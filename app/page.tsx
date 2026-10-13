@@ -11,8 +11,10 @@ type Deal = {
   market: string;
   broadcaster: string;
   packageName: string;
+  packageDetails: string;
   rightsType: string;
   cycle: string;
+  matchCount: number | null;
   aav: number | null;
   cycleTotal: number | null;
   currency: string;
@@ -41,8 +43,10 @@ type ImportedRow = {
   market: string;
   broadcaster: string;
   packageName: string;
+  packageDetails: string;
   rightsType: string;
   cycle: string;
+  matchCount: string;
   reportedAav: string;
   cycleTotal: string;
   currency: string;
@@ -65,26 +69,69 @@ const initialDeals: Deal[] = [
     id: 1,
     property: "UEFA Champions League",
     market: "United Kingdom",
-    broadcaster: "Reported market benchmark",
-    packageName: "All packages",
-    rightsType: "Market total",
+    broadcaster: "TNT Sports UK",
+    packageName: "Exclusive live package",
+    packageDetails:
+      "Exclusive live rights to 172 Champions League matches: all Tuesday nights, all Wednesday nights and the final. Also includes UEFA Europa League, UEFA Europa Conference League and UEFA Super Cup.",
+    rightsType: "Live",
     cycle: "2024–27",
-    aav: 562,
-    cycleTotal: 1686,
-    currency: "EUR",
-    recordType: "Market total",
-    includeInRollup: false,
-    source: "Sample prototype row",
-    confidence: "Medium",
+    matchCount: 172,
+    aav: 369.9,
+    cycleTotal: 1109.7,
+    currency: "USD",
+    recordType: "Deal",
+    includeInRollup: true,
+    source: "SportBusiness screenshot provided",
+    confidence: "High",
   },
   {
     id: 2,
     property: "UEFA Champions League",
+    market: "United Kingdom",
+    broadcaster: "Amazon",
+    packageName: "First-pick live package",
+    packageDetails:
+      "Exclusive rights to 17 first-pick Champions League matches on Tuesday nights. Does not include the Champions League final.",
+    rightsType: "Live",
+    cycle: "2024–27",
+    matchCount: 17,
+    aav: 208.4,
+    cycleTotal: 625.2,
+    currency: "USD",
+    recordType: "Deal",
+    includeInRollup: true,
+    source: "SportBusiness screenshot provided",
+    confidence: "High",
+  },
+  {
+    id: 3,
+    property: "UEFA Champions League",
+    market: "United Kingdom",
+    broadcaster: "BBC",
+    packageName: "Highlights and clips",
+    packageDetails:
+      "Highlights and clips rights. No live match rights specified.",
+    rightsType: "Highlights / clips",
+    cycle: "2024–27",
+    matchCount: null,
+    aav: 7.3,
+    cycleTotal: 21.9,
+    currency: "USD",
+    recordType: "Deal",
+    includeInRollup: true,
+    source: "SportBusiness screenshot provided",
+    confidence: "High",
+  },
+  {
+    id: 4,
+    property: "UEFA Champions League",
     market: "Germany",
     broadcaster: "DAZN",
     packageName: "National live package",
+    packageDetails: "Sample package detail to be confirmed.",
     rightsType: "Live",
     cycle: "2024–27",
+    matchCount: null,
     aav: 240,
     cycleTotal: 720,
     currency: "EUR",
@@ -94,13 +141,15 @@ const initialDeals: Deal[] = [
     confidence: "Medium",
   },
   {
-    id: 3,
+    id: 5,
     property: "Premier League",
     market: "United Kingdom",
     broadcaster: "Reported market benchmark",
     packageName: "All packages",
+    packageDetails: "Reported market total; not allocated to individual deals.",
     rightsType: "Market total",
     cycle: "2025–29",
+    matchCount: null,
     aav: 1700,
     cycleTotal: 6800,
     currency: "GBP",
@@ -110,13 +159,15 @@ const initialDeals: Deal[] = [
     confidence: "Medium",
   },
   {
-    id: 4,
+    id: 6,
     property: "LaLiga",
     market: "United States",
     broadcaster: "Reported market benchmark",
     packageName: "All packages",
+    packageDetails: "Reported market total; not allocated to individual deals.",
     rightsType: "Market total",
     cycle: "2024–27",
+    matchCount: null,
     aav: 175,
     cycleTotal: 525,
     currency: "USD",
@@ -126,13 +177,15 @@ const initialDeals: Deal[] = [
     confidence: "Medium",
   },
   {
-    id: 5,
+    id: 7,
     property: "Bundesliga",
     market: "United States",
     broadcaster: "Broadcaster to confirm",
     packageName: "Package to confirm",
+    packageDetails: "",
     rightsType: "Live",
     cycle: "2025–29",
+    matchCount: null,
     aav: null,
     cycleTotal: null,
     currency: "USD",
@@ -142,13 +195,15 @@ const initialDeals: Deal[] = [
     confidence: "Low",
   },
   {
-    id: 6,
+    id: 8,
     property: "Serie A",
     market: "United Kingdom",
     broadcaster: "Broadcaster to confirm",
     packageName: "Package to confirm",
+    packageDetails: "",
     rightsType: "Live",
     cycle: "2024–27",
+    matchCount: null,
     aav: null,
     cycleTotal: null,
     currency: "GBP",
@@ -158,13 +213,15 @@ const initialDeals: Deal[] = [
     confidence: "Low",
   },
   {
-    id: 7,
+    id: 9,
     property: "Ligue 1",
     market: "United Kingdom",
     broadcaster: "Broadcaster to confirm",
     packageName: "Package to confirm",
+    packageDetails: "",
     rightsType: "Live",
     cycle: "2024–27",
+    matchCount: null,
     aav: null,
     cycleTotal: null,
     currency: "GBP",
@@ -174,13 +231,15 @@ const initialDeals: Deal[] = [
     confidence: "Low",
   },
   {
-    id: 8,
+    id: 10,
     property: "WSL",
     market: "United Kingdom",
     broadcaster: "Broadcaster to confirm",
     packageName: "Package to confirm",
+    packageDetails: "",
     rightsType: "Live",
     cycle: "2025–29",
+    matchCount: null,
     aav: null,
     cycleTotal: null,
     currency: "GBP",
@@ -199,7 +258,7 @@ const initialCommercialInputs: CommercialInput[] = [
     cycle: "2024–27",
     aav: "",
     cycleTotal: "",
-    currency: "EUR",
+    currency: "USD",
     confidence: "Medium",
     owner: "Football Commercial",
     due: "18 Oct 2026",
@@ -285,8 +344,10 @@ const sampleImport: ImportedRow[] = [
     market: "Germany",
     broadcaster: "DAZN",
     packageName: "National live package",
+    packageDetails: "Sample package detail to be confirmed.",
     rightsType: "Live",
     cycle: "2024–27",
+    matchCount: "",
     reportedAav: "240",
     cycleTotal: "720",
     currency: "EUR",
@@ -299,27 +360,15 @@ const sampleImport: ImportedRow[] = [
     market: "United Kingdom",
     broadcaster: "Reported market benchmark",
     packageName: "All packages",
+    packageDetails: "Reported market total.",
     rightsType: "Market total",
     cycle: "2025–29",
+    matchCount: "",
     reportedAav: "1700",
     cycleTotal: "6800",
     currency: "GBP",
     recordType: "Market total",
     status: "Ready to review",
-  },
-  {
-    id: 103,
-    property: "LaLiga",
-    market: "Japan",
-    broadcaster: "",
-    packageName: "",
-    rightsType: "",
-    cycle: "2024–27",
-    reportedAav: "",
-    cycleTotal: "",
-    currency: "JPY",
-    recordType: "Deal",
-    status: "Needs attention",
   },
 ];
 
@@ -337,6 +386,11 @@ function parseAmount(value: string): number | null {
   }
 
   return cleaned.includes("bn") ? number * 1000 : number;
+}
+
+function parseMatchCount(value: string): number | null {
+  const number = Number.parseInt(value.replace(/[^\d]/g, ""), 10);
+  return Number.isNaN(number) ? null : number;
 }
 
 function formatValue(value: number | null, currency: string): string {
@@ -370,11 +424,18 @@ function getCell(row: Record<string, unknown>, hints: string[]): string {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("Rights Overview");
-  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(
+    null
+  );
+  const [selectedMarketKey, setSelectedMarketKey] = useState<string | null>(
+    null
+  );
+
   const [deals, setDeals] = useState<Deal[]>(initialDeals);
   const [commercialInputs, setCommercialInputs] = useState<
     CommercialInput[]
   >(initialCommercialInputs);
+
   const [importRows, setImportRows] = useState<ImportedRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [importMessage, setImportMessage] = useState(
@@ -386,22 +447,14 @@ export default function Home() {
     return properties.map((property) => {
       const propertyDeals = deals.filter((deal) => deal.property === property);
       const markets = new Set(propertyDeals.map((deal) => deal.market));
-      const inputs = commercialInputs.filter(
-        (input) => input.property === property
-      );
-      const completedInputs = inputs.filter(
-        (input) => input.aav.trim() || input.cycleTotal.trim()
-      ).length;
 
       return {
         property,
         markets: markets.size,
         records: propertyDeals.length,
-        completedInputs,
-        totalInputs: inputs.length,
       };
     });
-  }, [deals, commercialInputs]);
+  }, [deals]);
 
   const marketSummaries = useMemo(() => {
     if (!selectedProperty) {
@@ -459,26 +512,15 @@ export default function Home() {
           input.cycle === group.cycle
       );
 
-      const sportBusinessAav = marketTotal?.aav ?? (dealAav || null);
-      const sportBusinessTotal =
-        marketTotal?.cycleTotal ?? (dealCycleTotal || null);
-
-      const commercialAav = commercial
-        ? parseAmount(commercial.aav)
-        : null;
-
-      const commercialTotal = commercial
-        ? parseAmount(commercial.cycleTotal)
-        : null;
-
       return {
         ...group,
-        dealCount: group.rows.filter((row) => row.recordType === "Deal")
-          .length,
-        sportBusinessAav,
-        sportBusinessTotal,
-        commercialAav,
-        commercialTotal,
+        sportBusinessAav: marketTotal?.aav ?? (dealAav || null),
+        sportBusinessTotal:
+          marketTotal?.cycleTotal ?? (dealCycleTotal || null),
+        commercialAav: commercial ? parseAmount(commercial.aav) : null,
+        commercialTotal: commercial
+          ? parseAmount(commercial.cycleTotal)
+          : null,
         commercial,
       };
     });
@@ -487,6 +529,18 @@ export default function Home() {
   const selectedDeals = selectedProperty
     ? deals.filter((deal) => deal.property === selectedProperty)
     : [];
+
+  const selectedMarket = marketSummaries.find(
+    (market) =>
+      `${market.market}-${market.cycle}` === selectedMarketKey
+  );
+
+  const breakdownDeals = selectedDeals.filter(
+    (deal) =>
+      deal.market === selectedMarket?.market &&
+      deal.cycle === selectedMarket?.cycle &&
+      deal.recordType === "Deal"
+  );
 
   const completedCommercialInputs = commercialInputs.filter(
     (input) => input.aav.trim() || input.cycleTotal.trim()
@@ -499,6 +553,7 @@ export default function Home() {
   function navigate(tab: Tab) {
     setActiveTab(tab);
     setSelectedProperty(null);
+    setSelectedMarketKey(null);
   }
 
   function updateCommercial(
@@ -507,9 +562,49 @@ export default function Home() {
     value: string
   ) {
     setCommercialInputs((current) =>
-      current.map((input) =>
-        input.id === id ? { ...input, [field]: value } : input
-      )
+      current.map((input) => {
+        if (input.id !== id) {
+          return input;
+        }
+
+        if (field === "confidence") {
+          return {
+            ...input,
+            confidence: value as CommercialInput["confidence"],
+          };
+        }
+
+        return {
+          ...input,
+          [field]: value,
+        };
+      })
+    );
+  }
+
+  function updateDeal(
+    id: number,
+    field: "matchCount" | "packageDetails",
+    value: string
+  ) {
+    setDeals((current) =>
+      current.map((deal) => {
+        if (deal.id !== id) {
+          return deal;
+        }
+
+        if (field === "matchCount") {
+          return {
+            ...deal,
+            matchCount: value === "" ? null : Number(value),
+          };
+        }
+
+        return {
+          ...deal,
+          packageDetails: value,
+        };
+      })
     );
   }
 
@@ -565,6 +660,13 @@ export default function Home() {
             "selection",
           ]);
 
+          const packageDetails = getCell(row, [
+            "package details",
+            "description",
+            "detail",
+            "notes",
+          ]);
+
           const rightsType = getCell(row, [
             "rights type",
             "right type",
@@ -572,6 +674,14 @@ export default function Home() {
           ]);
 
           const cycle = getCell(row, ["cycle", "season", "period"]);
+
+          const matchCount = getCell(row, [
+            "match count",
+            "number of matches",
+            "matches",
+            "fixtures",
+            "games",
+          ]);
 
           const reportedAav = getCell(row, [
             "aav",
@@ -606,8 +716,10 @@ export default function Home() {
             market,
             broadcaster,
             packageName,
+            packageDetails,
             rightsType,
             cycle,
+            matchCount,
             reportedAav,
             cycleTotal,
             currency,
@@ -650,8 +762,10 @@ export default function Home() {
       market: row.market,
       broadcaster: row.broadcaster || "Broadcaster to confirm",
       packageName: row.packageName || "Package to confirm",
+      packageDetails: row.packageDetails || "",
       rightsType: row.rightsType || "To confirm",
       cycle: row.cycle || "To confirm",
+      matchCount: parseMatchCount(row.matchCount),
       aav: parseAmount(row.reportedAav),
       cycleTotal: parseAmount(row.cycleTotal),
       currency: row.currency || "EUR",
@@ -742,8 +856,7 @@ export default function Home() {
 
             <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-950">
               <strong>Prototype data:</strong> the figures currently shown are
-              sample rows to demonstrate the structure. Approved SportBusiness
-              data will replace them through the import workflow.
+              sample rows to demonstrate the structure.
             </div>
 
             <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -777,15 +890,18 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <p className="text-slate-500">IMG inputs</p>
+                      <p className="text-slate-500">Deal records</p>
                       <p className="mt-1 text-lg font-bold">
-                        {summary.completedInputs}/{summary.totalInputs}
+                        {summary.records}
                       </p>
                     </div>
                   </div>
 
                   <button
-                    onClick={() => setSelectedProperty(summary.property)}
+                    onClick={() => {
+                      setSelectedProperty(summary.property);
+                      setSelectedMarketKey(null);
+                    }}
                     className="mt-6 w-full rounded-lg bg-[#10233f] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1b3558]"
                   >
                     View property
@@ -820,7 +936,10 @@ export default function Home() {
         {activeTab === "Rights Overview" && selectedProperty && (
           <>
             <button
-              onClick={() => setSelectedProperty(null)}
+              onClick={() => {
+                setSelectedProperty(null);
+                setSelectedMarketKey(null);
+              }}
               className="mb-6 text-sm font-semibold text-[#e21d38] hover:underline"
             >
               ← Back to rights overview
@@ -834,8 +953,7 @@ export default function Home() {
               <h1 className="mt-2 text-3xl font-bold">{selectedProperty}</h1>
 
               <p className="mt-2 text-slate-600">
-                Market-level comparison supported by a broadcaster and deal-level
-                register.
+                Select a market to view its broadcaster and package breakdown.
               </p>
             </div>
 
@@ -850,19 +968,18 @@ export default function Home() {
               <div className="rounded-xl bg-white p-5 shadow-sm">
                 <p className="text-sm text-slate-500">Deal records</p>
                 <p className="mt-2 text-2xl font-bold">
-                  {selectedDeals.filter((deal) => deal.recordType === "Deal")
-                    .length}
+                  {
+                    selectedDeals.filter(
+                      (deal) => deal.recordType === "Deal"
+                    ).length
+                  }
                 </p>
               </div>
 
               <div className="rounded-xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-slate-500">IMG inputs</p>
+                <p className="text-sm text-slate-500">SportBusiness records</p>
                 <p className="mt-2 text-2xl font-bold">
-                  {
-                    marketSummaries.filter(
-                      (market) => market.commercialAav !== null
-                    ).length
-                  }
+                  {selectedDeals.length}
                 </p>
               </div>
 
@@ -875,9 +992,10 @@ export default function Home() {
             <section className="mb-8 rounded-xl bg-white p-6 shadow-sm">
               <div className="mb-5">
                 <h2 className="text-xl font-bold">Market comparison</h2>
+
                 <p className="mt-1 text-sm text-slate-500">
-                  SportBusiness figures are kept separate from the IMG
-                  commercial view.
+                  Select the market name to open its broadcaster and package
+                  detail.
                 </p>
               </div>
 
@@ -899,32 +1017,49 @@ export default function Home() {
                       <th className="bg-red-50 p-3 text-[#a31328]">
                         IMG total
                       </th>
-                      <th className="p-3">Status</th>
+                      <th className="p-3">Difference</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {marketSummaries.map((market) => {
+                      const marketKey = `${market.market}-${market.cycle}`;
+                      const isSelected = selectedMarketKey === marketKey;
+
                       const difference =
                         market.commercialAav !== null &&
                         market.sportBusinessAav !== null
-                          ? market.commercialAav - market.sportBusinessAav
+                          ? market.commercialAav -
+                            market.sportBusinessAav
                           : null;
 
                       return (
                         <tr
-                          key={`${market.market}-${market.cycle}`}
-                          className="border-b last:border-0"
+                          key={marketKey}
+                          className={`border-b transition ${
+                            isSelected ? "bg-blue-50" : "hover:bg-slate-50"
+                          }`}
                         >
-                          <td className="p-3 font-semibold">
-                            {market.market}
+                          <td className="p-3">
+                            <button
+                              onClick={() => setSelectedMarketKey(marketKey)}
+                              className="text-left"
+                            >
+                              <div className="font-semibold text-[#10233f]">
+                                {market.market}
+                              </div>
+
+                              <div className="mt-1 text-xs font-medium text-[#e21d38]">
+                                Open broadcaster breakdown →
+                              </div>
+                            </button>
                           </td>
 
                           <td className="p-3 text-slate-500">
                             {market.cycle}
                           </td>
 
-                          <td className="bg-blue-50 p-3 font-medium text-blue-950">
+                          <td className="bg-blue-50 p-3 font-semibold text-blue-900">
                             {formatValue(
                               market.sportBusinessAav,
                               market.currency
@@ -975,59 +1110,179 @@ export default function Home() {
             </section>
 
             <section className="rounded-xl bg-white p-6 shadow-sm">
-              <div className="mb-5">
-                <h2 className="text-xl font-bold">
-                  Deal register and reported records
-                </h2>
+              {!selectedMarket ? (
+                <div className="rounded-xl border-2 border-dashed border-slate-200 p-10 text-center">
+                  <h2 className="text-lg font-bold">
+                    Broadcaster breakdown
+                  </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  One row per broadcaster, package or reported market total.
-                  Market totals are excluded from deal roll-ups to prevent
-                  double-counting.
-                </p>
-              </div>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Select a market above to see broadcaster, package, match
+                    count and deal-value detail.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-5 flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[#e21d38]">
+                        Deal-level detail
+                      </p>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b text-xs uppercase tracking-wide text-slate-500">
-                      <th className="p-3">Market</th>
-                      <th className="p-3">Broadcaster / record</th>
-                      <th className="p-3">Package</th>
-                      <th className="p-3">Rights type</th>
-                      <th className="p-3">AAV</th>
-                      <th className="p-3">Cycle total</th>
-                      <th className="p-3">Record type</th>
-                      <th className="p-3">Confidence</th>
-                    </tr>
-                  </thead>
+                      <h2 className="mt-1 text-xl font-bold">
+                        {selectedMarket.market} broadcaster breakdown
+                      </h2>
 
-                  <tbody>
-                    {selectedDeals.map((deal) => (
-                      <tr key={deal.id} className="border-b last:border-0">
-                        <td className="p-3">{deal.market}</td>
-                        <td className="p-3 font-semibold">
-                          {deal.broadcaster}
-                        </td>
-                        <td className="p-3">{deal.packageName}</td>
-                        <td className="p-3">{deal.rightsType}</td>
-                        <td className="p-3">
-                          {formatValue(deal.aav, deal.currency)}
-                        </td>
-                        <td className="p-3">
-                          {formatValue(deal.cycleTotal, deal.currency)}
-                        </td>
-                        <td className="p-3">
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                            {deal.recordType}
-                          </span>
-                        </td>
-                        <td className="p-3">{deal.confidence}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {selectedMarket.cycle} · Match counts and package
+                        details can be updated here.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedMarketKey(null)}
+                      className="text-sm font-semibold text-slate-500 hover:text-[#10233f]"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  <div className="mb-5 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-lg bg-blue-50 p-4">
+                      <p className="text-xs font-semibold uppercase text-blue-700">
+                        SportBusiness market total
+                      </p>
+
+                      <p className="mt-1 text-xl font-bold text-blue-950">
+                        {formatValue(
+                          selectedMarket.sportBusinessAav,
+                          selectedMarket.currency
+                        )}{" "}
+                        AAV
+                      </p>
+
+                      <p className="mt-1 text-sm text-blue-800">
+                        {formatValue(
+                          selectedMarket.sportBusinessTotal,
+                          selectedMarket.currency
+                        )}{" "}
+                        over cycle
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-red-50 p-4">
+                      <p className="text-xs font-semibold uppercase text-[#a31328]">
+                        IMG commercial view
+                      </p>
+
+                      <p className="mt-1 text-xl font-bold text-[#8e1023]">
+                        {formatValue(
+                          selectedMarket.commercialAav,
+                          selectedMarket.commercial?.currency ??
+                            selectedMarket.currency
+                        )}{" "}
+                        AAV
+                      </p>
+
+                      <p className="mt-1 text-sm text-[#8e1023]">
+                        {formatValue(
+                          selectedMarket.commercialTotal,
+                          selectedMarket.commercial?.currency ??
+                            selectedMarket.currency
+                        )}{" "}
+                        over cycle
+                      </p>
+                    </div>
+                  </div>
+
+                  {breakdownDeals.length === 0 ? (
+                    <div className="rounded-lg bg-slate-50 p-8 text-center text-sm text-slate-500">
+                      No individual broadcaster deals have been recorded for
+                      this market yet.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="border-b text-xs uppercase tracking-wide text-slate-500">
+                            <th className="p-3">Broadcaster</th>
+                            <th className="p-3">Package</th>
+                            <th className="p-3">Matches</th>
+                            <th className="p-3">Package details</th>
+                            <th className="p-3">Rights type</th>
+                            <th className="p-3">AAV</th>
+                            <th className="p-3">Cycle total</th>
+                            <th className="p-3">Confidence</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {breakdownDeals.map((deal) => (
+                            <tr
+                              key={deal.id}
+                              className="border-b align-top last:border-0"
+                            >
+                              <td className="p-3 font-semibold">
+                                {deal.broadcaster}
+                              </td>
+
+                              <td className="p-3">{deal.packageName}</td>
+
+                              <td className="p-3">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={deal.matchCount ?? ""}
+                                  onChange={(event) =>
+                                    updateDeal(
+                                      deal.id,
+                                      "matchCount",
+                                      event.target.value
+                                    )
+                                  }
+                                  placeholder="—"
+                                  className="w-24 rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-[#e21d38] focus:ring-2 focus:ring-red-100"
+                                />
+                              </td>
+
+                              <td className="min-w-72 p-3">
+                                <textarea
+                                  value={deal.packageDetails}
+                                  onChange={(event) =>
+                                    updateDeal(
+                                      deal.id,
+                                      "packageDetails",
+                                      event.target.value
+                                    )
+                                  }
+                                  placeholder="Add package details"
+                                  rows={3}
+                                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#e21d38] focus:ring-2 focus:ring-red-100"
+                                />
+                              </td>
+
+                              <td className="p-3">{deal.rightsType}</td>
+
+                              <td className="p-3">
+                                {formatValue(deal.aav, deal.currency)}
+                              </td>
+
+                              <td className="p-3">
+                                {formatValue(
+                                  deal.cycleTotal,
+                                  deal.currency
+                                )}
+                              </td>
+
+                              <td className="p-3">{deal.confidence}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
+              )}
             </section>
           </>
         )}
@@ -1095,9 +1350,9 @@ export default function Home() {
 
                 <div className="mt-4 space-y-3 text-sm text-slate-600">
                   <p>✓ One row represents a broadcaster, package or total.</p>
+                  <p>✓ Match count and package details are retained.</p>
                   <p>✓ AAV remains separate from total cycle value.</p>
-                  <p>✓ Market totals are not included in deal roll-ups.</p>
-                  <p>✓ Missing values require human review.</p>
+                  <p>✓ Market totals are excluded from deal roll-ups.</p>
                   <p>✓ Only approved rows enter the tracker.</p>
                 </div>
               </div>
@@ -1136,6 +1391,7 @@ export default function Home() {
                         <th className="p-3">Market</th>
                         <th className="p-3">Broadcaster</th>
                         <th className="p-3">Package</th>
+                        <th className="p-3">Matches</th>
                         <th className="p-3">AAV</th>
                         <th className="p-3">Cycle total</th>
                         <th className="p-3">Type</th>
@@ -1149,13 +1405,19 @@ export default function Home() {
                           <td className="p-3 font-semibold">
                             {row.property || "Missing"}
                           </td>
+
                           <td className="p-3">{row.market || "Missing"}</td>
+
                           <td className="p-3">
                             {row.broadcaster || "Missing"}
                           </td>
+
                           <td className="p-3">
                             {row.packageName || "Missing"}
                           </td>
+
+                          <td className="p-3">{row.matchCount || "—"}</td>
+
                           <td className="p-3">
                             {row.reportedAav
                               ? formatValue(
@@ -1164,6 +1426,7 @@ export default function Home() {
                                 )
                               : "Not found"}
                           </td>
+
                           <td className="p-3">
                             {row.cycleTotal
                               ? formatValue(
@@ -1172,7 +1435,9 @@ export default function Home() {
                                 )
                               : "Not found"}
                           </td>
+
                           <td className="p-3">{row.recordType}</td>
+
                           <td className="p-3">
                             <span
                               className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -1217,8 +1482,7 @@ export default function Home() {
               </h2>
 
               <p className="mt-1 text-sm text-[#8e1023]">
-                These values are internal estimates or intelligence. They are
-                not used to overwrite SportBusiness records.
+                These values do not overwrite SportBusiness records.
               </p>
             </section>
 
@@ -1261,24 +1525,18 @@ export default function Home() {
 
                   <tbody>
                     {commercialInputs.map((input) => {
-                      const benchmark = marketSummaries.find(
-                        (market) =>
-                          market.property === input.property &&
-                          market.market === input.market &&
-                          market.cycle === input.cycle
-                      );
-
-                      const fallbackBenchmark = deals.find(
+                      const matchingDeals = deals.filter(
                         (deal) =>
                           deal.property === input.property &&
                           deal.market === input.market &&
-                          deal.cycle === input.cycle
+                          deal.cycle === input.cycle &&
+                          deal.includeInRollup
                       );
 
-                      const benchmarkValue =
-                        benchmark?.sportBusinessAav ??
-                        fallbackBenchmark?.aav ??
-                        null;
+                      const benchmarkAav = matchingDeals.reduce(
+                        (total, deal) => total + (deal.aav ?? 0),
+                        0
+                      );
 
                       return (
                         <tr
@@ -1292,7 +1550,9 @@ export default function Home() {
                           <td className="p-3">{input.market}</td>
 
                           <td className="p-3 text-blue-900">
-                            {formatValue(benchmarkValue, input.currency)}
+                            {benchmarkAav
+                              ? formatValue(benchmarkAav, input.currency)
+                              : "—"}
                           </td>
 
                           <td className="bg-red-50 p-3">
