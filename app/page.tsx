@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 
 type Tab = "Rights Overview" | "SportBusiness Import" | "Commercial Inputs";
@@ -72,7 +72,7 @@ const initialDeals: Deal[] = [
     broadcaster: "TNT Sports UK",
     packageName: "Exclusive live package",
     packageDetails:
-      "Exclusive live rights to 172 Champions League matches: all Tuesday nights, all Wednesday nights and the final. Also includes UEFA Europa League, UEFA Europa Conference League and UEFA Super Cup.",
+      "172 live Champions League matches: all Tuesday nights, all Wednesday nights and the final. Also includes Europa League, Europa Conference League and Super Cup.",
     rightsType: "Live",
     cycle: "2024–27",
     matchCount: 172,
@@ -81,7 +81,7 @@ const initialDeals: Deal[] = [
     currency: "USD",
     recordType: "Deal",
     includeInRollup: true,
-    source: "SportBusiness screenshot provided",
+    source: "SportBusiness screenshot",
     confidence: "High",
   },
   {
@@ -91,7 +91,7 @@ const initialDeals: Deal[] = [
     broadcaster: "Amazon",
     packageName: "First-pick live package",
     packageDetails:
-      "Exclusive rights to 17 first-pick Champions League matches on Tuesday nights. Does not include the Champions League final.",
+      "17 first-pick Champions League matches on Tuesday nights. Excludes the Champions League final.",
     rightsType: "Live",
     cycle: "2024–27",
     matchCount: 17,
@@ -100,7 +100,7 @@ const initialDeals: Deal[] = [
     currency: "USD",
     recordType: "Deal",
     includeInRollup: true,
-    source: "SportBusiness screenshot provided",
+    source: "SportBusiness screenshot",
     confidence: "High",
   },
   {
@@ -109,8 +109,7 @@ const initialDeals: Deal[] = [
     market: "United Kingdom",
     broadcaster: "BBC",
     packageName: "Highlights and clips",
-    packageDetails:
-      "Highlights and clips rights. No live match rights specified.",
+    packageDetails: "Highlights and clips rights. No live rights specified.",
     rightsType: "Highlights / clips",
     cycle: "2024–27",
     matchCount: null,
@@ -119,7 +118,7 @@ const initialDeals: Deal[] = [
     currency: "USD",
     recordType: "Deal",
     includeInRollup: true,
-    source: "SportBusiness screenshot provided",
+    source: "SportBusiness screenshot",
     confidence: "High",
   },
   {
@@ -137,7 +136,7 @@ const initialDeals: Deal[] = [
     currency: "EUR",
     recordType: "Deal",
     includeInRollup: true,
-    source: "Sample prototype row",
+    source: "Sample data",
     confidence: "Medium",
   },
   {
@@ -146,7 +145,7 @@ const initialDeals: Deal[] = [
     market: "United Kingdom",
     broadcaster: "Reported market benchmark",
     packageName: "All packages",
-    packageDetails: "Reported market total; not allocated to individual deals.",
+    packageDetails: "Reported market total.",
     rightsType: "Market total",
     cycle: "2025–29",
     matchCount: null,
@@ -155,7 +154,7 @@ const initialDeals: Deal[] = [
     currency: "GBP",
     recordType: "Market total",
     includeInRollup: false,
-    source: "Sample prototype row",
+    source: "Sample data",
     confidence: "Medium",
   },
   {
@@ -164,7 +163,7 @@ const initialDeals: Deal[] = [
     market: "United States",
     broadcaster: "Reported market benchmark",
     packageName: "All packages",
-    packageDetails: "Reported market total; not allocated to individual deals.",
+    packageDetails: "Reported market total.",
     rightsType: "Market total",
     cycle: "2024–27",
     matchCount: null,
@@ -173,80 +172,8 @@ const initialDeals: Deal[] = [
     currency: "USD",
     recordType: "Market total",
     includeInRollup: false,
-    source: "Sample prototype row",
+    source: "Sample data",
     confidence: "Medium",
-  },
-  {
-    id: 7,
-    property: "Bundesliga",
-    market: "United States",
-    broadcaster: "Broadcaster to confirm",
-    packageName: "Package to confirm",
-    packageDetails: "",
-    rightsType: "Live",
-    cycle: "2025–29",
-    matchCount: null,
-    aav: null,
-    cycleTotal: null,
-    currency: "USD",
-    recordType: "Deal",
-    includeInRollup: true,
-    source: "Pending input",
-    confidence: "Low",
-  },
-  {
-    id: 8,
-    property: "Serie A",
-    market: "United Kingdom",
-    broadcaster: "Broadcaster to confirm",
-    packageName: "Package to confirm",
-    packageDetails: "",
-    rightsType: "Live",
-    cycle: "2024–27",
-    matchCount: null,
-    aav: null,
-    cycleTotal: null,
-    currency: "GBP",
-    recordType: "Deal",
-    includeInRollup: true,
-    source: "Pending input",
-    confidence: "Low",
-  },
-  {
-    id: 9,
-    property: "Ligue 1",
-    market: "United Kingdom",
-    broadcaster: "Broadcaster to confirm",
-    packageName: "Package to confirm",
-    packageDetails: "",
-    rightsType: "Live",
-    cycle: "2024–27",
-    matchCount: null,
-    aav: null,
-    cycleTotal: null,
-    currency: "GBP",
-    recordType: "Deal",
-    includeInRollup: true,
-    source: "Pending input",
-    confidence: "Low",
-  },
-  {
-    id: 10,
-    property: "WSL",
-    market: "United Kingdom",
-    broadcaster: "Broadcaster to confirm",
-    packageName: "Package to confirm",
-    packageDetails: "",
-    rightsType: "Live",
-    cycle: "2025–29",
-    matchCount: null,
-    aav: null,
-    cycleTotal: null,
-    currency: "GBP",
-    recordType: "Deal",
-    includeInRollup: true,
-    source: "Pending input",
-    confidence: "Low",
   },
 ];
 
@@ -287,103 +214,24 @@ const initialCommercialInputs: CommercialInput[] = [
     owner: "Americas Commercial",
     due: "25 Oct 2026",
   },
-  {
-    id: 4,
-    property: "Bundesliga",
-    market: "United States",
-    cycle: "2025–29",
-    aav: "",
-    cycleTotal: "",
-    currency: "USD",
-    confidence: "Low",
-    owner: "Americas Commercial",
-    due: "25 Oct 2026",
-  },
-  {
-    id: 5,
-    property: "Serie A",
-    market: "United Kingdom",
-    cycle: "2024–27",
-    aav: "",
-    cycleTotal: "",
-    currency: "GBP",
-    confidence: "Low",
-    owner: "Football Commercial",
-    due: "1 Nov 2026",
-  },
-  {
-    id: 6,
-    property: "Ligue 1",
-    market: "United Kingdom",
-    cycle: "2024–27",
-    aav: "",
-    cycleTotal: "",
-    currency: "GBP",
-    confidence: "Low",
-    owner: "Football Commercial",
-    due: "1 Nov 2026",
-  },
-  {
-    id: 7,
-    property: "WSL",
-    market: "United Kingdom",
-    cycle: "2025–29",
-    aav: "",
-    cycleTotal: "",
-    currency: "GBP",
-    confidence: "Low",
-    owner: "Football Commercial",
-    due: "8 Nov 2026",
-  },
 ];
 
-const sampleImport: ImportedRow[] = [
-  {
-    id: 101,
-    property: "UEFA Champions League",
-    market: "Germany",
-    broadcaster: "DAZN",
-    packageName: "National live package",
-    packageDetails: "Sample package detail to be confirmed.",
-    rightsType: "Live",
-    cycle: "2024–27",
-    matchCount: "",
-    reportedAav: "240",
-    cycleTotal: "720",
-    currency: "EUR",
-    recordType: "Deal",
-    status: "Ready to review",
-  },
-  {
-    id: 102,
-    property: "Premier League",
-    market: "United Kingdom",
-    broadcaster: "Reported market benchmark",
-    packageName: "All packages",
-    packageDetails: "Reported market total.",
-    rightsType: "Market total",
-    cycle: "2025–29",
-    matchCount: "",
-    reportedAav: "1700",
-    cycleTotal: "6800",
-    currency: "GBP",
-    recordType: "Market total",
-    status: "Ready to review",
-  },
-];
+const STORAGE_KEYS = {
+  deals: "img-rights-tracker-deals",
+  commercialInputs: "img-rights-tracker-commercial-inputs",
+  importRows: "img-rights-tracker-import-rows",
+  fileName: "img-rights-tracker-import-file",
+  approvedCount: "img-rights-tracker-approved-count",
+};
 
 function parseAmount(value: string): number | null {
   const cleaned = value.toLowerCase().replace(/,/g, "").trim();
 
-  if (!cleaned) {
-    return null;
-  }
+  if (!cleaned) return null;
 
   const number = Number.parseFloat(cleaned.replace(/[^\d.-]/g, ""));
 
-  if (Number.isNaN(number)) {
-    return null;
-  }
+  if (Number.isNaN(number)) return null;
 
   return cleaned.includes("bn") ? number * 1000 : number;
 }
@@ -394,9 +242,7 @@ function parseMatchCount(value: string): number | null {
 }
 
 function formatValue(value: number | null, currency: string): string {
-  if (value === null || Number.isNaN(value)) {
-    return "—";
-  }
+  if (value === null || Number.isNaN(value)) return "—";
 
   const symbols: Record<string, string> = {
     EUR: "€",
@@ -422,6 +268,23 @@ function getCell(row: Record<string, unknown>, hints: string[]): string {
   return key ? String(row[key] ?? "") : "";
 }
 
+function getDealKey(
+  deal: Pick<
+    Deal,
+    "property" | "market" | "broadcaster" | "packageName" | "cycle"
+  >
+) {
+  return [
+    deal.property,
+    deal.market,
+    deal.broadcaster,
+    deal.packageName,
+    deal.cycle,
+  ]
+    .map((value) => value.trim().toLowerCase())
+    .join("|");
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("Rights Overview");
   const [selectedProperty, setSelectedProperty] = useState<string | null>(
@@ -442,9 +305,82 @@ export default function Home() {
     "Upload a SportBusiness CSV or Excel export to begin."
   );
   const [approvedCount, setApprovedCount] = useState(0);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedDeals = localStorage.getItem(STORAGE_KEYS.deals);
+      const savedInputs = localStorage.getItem(
+        STORAGE_KEYS.commercialInputs
+      );
+      const savedRows = localStorage.getItem(STORAGE_KEYS.importRows);
+      const savedFileName = localStorage.getItem(STORAGE_KEYS.fileName);
+      const savedApprovedCount = localStorage.getItem(
+        STORAGE_KEYS.approvedCount
+      );
+
+      if (savedDeals) {
+        setDeals(JSON.parse(savedDeals) as Deal[]);
+      }
+
+      if (savedInputs) {
+        setCommercialInputs(
+          JSON.parse(savedInputs) as CommercialInput[]
+        );
+      }
+
+      if (savedRows) {
+        setImportRows(JSON.parse(savedRows) as ImportedRow[]);
+      }
+
+      if (savedFileName) {
+        setFileName(savedFileName);
+      }
+
+      if (savedApprovedCount) {
+        setApprovedCount(Number(savedApprovedCount));
+      }
+    } catch {
+      console.warn("Saved tracker data could not be loaded.");
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    localStorage.setItem(STORAGE_KEYS.deals, JSON.stringify(deals));
+    localStorage.setItem(
+      STORAGE_KEYS.commercialInputs,
+      JSON.stringify(commercialInputs)
+    );
+    localStorage.setItem(STORAGE_KEYS.importRows, JSON.stringify(importRows));
+    localStorage.setItem(STORAGE_KEYS.fileName, fileName);
+    localStorage.setItem(
+      STORAGE_KEYS.approvedCount,
+      approvedCount.toString()
+    );
+  }, [
+    isHydrated,
+    deals,
+    commercialInputs,
+    importRows,
+    fileName,
+    approvedCount,
+  ]);
+
+  const propertyList = useMemo(() => {
+    return Array.from(
+      new Set([
+        ...properties,
+        ...deals.map((deal) => deal.property).filter(Boolean),
+      ])
+    );
+  }, [deals]);
 
   const propertySummaries = useMemo(() => {
-    return properties.map((property) => {
+    return propertyList.map((property) => {
       const propertyDeals = deals.filter((deal) => deal.property === property);
       const markets = new Set(propertyDeals.map((deal) => deal.market));
 
@@ -454,12 +390,10 @@ export default function Home() {
         records: propertyDeals.length,
       };
     });
-  }, [deals]);
+  }, [deals, propertyList]);
 
   const marketSummaries = useMemo(() => {
-    if (!selectedProperty) {
-      return [];
-    }
+    if (!selectedProperty) return [];
 
     const propertyDeals = deals.filter(
       (deal) => deal.property === selectedProperty
@@ -563,9 +497,7 @@ export default function Home() {
   ) {
     setCommercialInputs((current) =>
       current.map((input) => {
-        if (input.id !== id) {
-          return input;
-        }
+        if (input.id !== id) return input;
 
         if (field === "confidence") {
           return {
@@ -589,9 +521,7 @@ export default function Home() {
   ) {
     setDeals((current) =>
       current.map((deal) => {
-        if (deal.id !== id) {
-          return deal;
-        }
+        if (deal.id !== id) return deal;
 
         if (field === "matchCount") {
           return {
@@ -611,9 +541,7 @@ export default function Home() {
   async function handleFileUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     setFileName(file.name);
     setImportMessage("Reading export and mapping recognised columns...");
@@ -631,7 +559,7 @@ export default function Home() {
       );
 
       const mappedRows: ImportedRow[] = rawRows
-        .slice(0, 100)
+        .slice(0, 500)
         .map((row, index) => {
           const property = getCell(row, [
             "property",
@@ -743,14 +671,6 @@ export default function Home() {
     }
   }
 
-  function loadSampleExport() {
-    setFileName("sample-sportbusiness-export.xlsx");
-    setImportRows(sampleImport);
-    setImportMessage(
-      "Sample export loaded. Review the rows before approving them."
-    );
-  }
-
   function approveRows() {
     const rowsToApprove = importRows.filter(
       (row) => row.status === "Ready to review"
@@ -775,7 +695,15 @@ export default function Home() {
       confidence: "Medium",
     }));
 
-    setDeals((current) => [...current, ...newDeals]);
+    setDeals((current) => {
+      const importedKeys = new Set(newDeals.map(getDealKey));
+
+      return [
+        ...current.filter((deal) => !importedKeys.has(getDealKey(deal))),
+        ...newDeals,
+      ];
+    });
+
     setApprovedCount((current) => current + rowsToApprove.length);
 
     setImportRows((current) =>
@@ -789,7 +717,7 @@ export default function Home() {
     setImportMessage(
       `${rowsToApprove.length} row${
         rowsToApprove.length === 1 ? "" : "s"
-      } approved for the tracker.`
+      } approved. The data is saved in this browser.`
     );
   }
 
@@ -852,11 +780,6 @@ export default function Home() {
                 Select a property to explore reported deals, market totals and
                 the IMG commercial view.
               </p>
-            </div>
-
-            <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-950">
-              <strong>Prototype data:</strong> the figures currently shown are
-              sample rows to demonstrate the structure.
             </div>
 
             <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -957,45 +880,13 @@ export default function Home() {
               </p>
             </div>
 
-            <section className="mb-8 grid gap-4 md:grid-cols-4">
-              <div className="rounded-xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-slate-500">Markets</p>
-                <p className="mt-2 text-2xl font-bold">
-                  {marketSummaries.length}
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-slate-500">Deal records</p>
-                <p className="mt-2 text-2xl font-bold">
-                  {
-                    selectedDeals.filter(
-                      (deal) => deal.recordType === "Deal"
-                    ).length
-                  }
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-slate-500">SportBusiness records</p>
-                <p className="mt-2 text-2xl font-bold">
-                  {selectedDeals.length}
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-white p-5 shadow-sm">
-                <p className="text-sm text-slate-500">Approved imports</p>
-                <p className="mt-2 text-2xl font-bold">{approvedCount}</p>
-              </div>
-            </section>
-
             <section className="mb-8 rounded-xl bg-white p-6 shadow-sm">
               <div className="mb-5">
                 <h2 className="text-xl font-bold">Market comparison</h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Select the market name to open its broadcaster and package
-                  detail.
+                  Open a market to see the underlying broadcaster and package
+                  details.
                 </p>
               </div>
 
@@ -1024,7 +915,6 @@ export default function Home() {
                   <tbody>
                     {marketSummaries.map((market) => {
                       const marketKey = `${market.market}-${market.cycle}`;
-                      const isSelected = selectedMarketKey === marketKey;
 
                       const difference =
                         market.commercialAav !== null &&
@@ -1037,12 +927,23 @@ export default function Home() {
                         <tr
                           key={marketKey}
                           className={`border-b transition ${
-                            isSelected ? "bg-blue-50" : "hover:bg-slate-50"
+                            selectedMarketKey === marketKey
+                              ? "bg-blue-50"
+                              : "hover:bg-slate-50"
                           }`}
                         >
                           <td className="p-3">
                             <button
-                              onClick={() => setSelectedMarketKey(marketKey)}
+                             onClick={() => {
+  setSelectedMarketKey(marketKey);
+
+  setTimeout(() => {
+    document
+      .getElementById("broadcaster-breakdown")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
+}}
+
                               className="text-left"
                             >
                               <div className="font-semibold text-[#10233f]">
@@ -1109,7 +1010,11 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="rounded-xl bg-white p-6 shadow-sm">
+           <section
+  id="broadcaster-breakdown"
+  className="scroll-mt-6 rounded-xl bg-white p-6 shadow-sm"
+>
+
               {!selectedMarket ? (
                 <div className="rounded-xl border-2 border-dashed border-slate-200 p-10 text-center">
                   <h2 className="text-lg font-bold">
@@ -1123,28 +1028,19 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <div className="mb-5 flex items-start justify-between">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest text-[#e21d38]">
-                        Deal-level detail
-                      </p>
+                  <div className="mb-5">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#e21d38]">
+                      Deal-level detail
+                    </p>
 
-                      <h2 className="mt-1 text-xl font-bold">
-                        {selectedMarket.market} broadcaster breakdown
-                      </h2>
+                    <h2 className="mt-1 text-xl font-bold">
+                      {selectedMarket.market} broadcaster breakdown
+                    </h2>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        {selectedMarket.cycle} · Match counts and package
-                        details can be updated here.
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setSelectedMarketKey(null)}
-                      className="text-sm font-semibold text-slate-500 hover:text-[#10233f]"
-                    >
-                      Clear
-                    </button>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {selectedMarket.cycle} · Package details and match counts
+                      can be edited here.
+                    </p>
                   </div>
 
                   <div className="mb-5 grid gap-4 md:grid-cols-2">
@@ -1209,7 +1105,6 @@ export default function Home() {
                             <th className="p-3">Package</th>
                             <th className="p-3">Matches</th>
                             <th className="p-3">Package details</th>
-                            <th className="p-3">Rights type</th>
                             <th className="p-3">AAV</th>
                             <th className="p-3">Cycle total</th>
                             <th className="p-3">Confidence</th>
@@ -1261,8 +1156,6 @@ export default function Home() {
                                 />
                               </td>
 
-                              <td className="p-3">{deal.rightsType}</td>
-
                               <td className="p-3">
                                 {formatValue(deal.aav, deal.currency)}
                               </td>
@@ -1299,8 +1192,8 @@ export default function Home() {
               </h1>
 
               <p className="mt-2 text-slate-600">
-                Upload an export, review the proposed deal-level mapping and
-                approve verified records.
+                Upload an export, review the proposed mapping and approve
+                verified records.
               </p>
             </div>
 
@@ -1320,7 +1213,7 @@ export default function Home() {
                   </span>
 
                   <span className="mt-1 text-xs text-slate-500">
-                    This prototype reads the file locally in your browser.
+                    The file is read locally in your browser.
                   </span>
 
                   <input
@@ -1330,13 +1223,6 @@ export default function Home() {
                     className="hidden"
                   />
                 </label>
-
-                <button
-                  onClick={loadSampleExport}
-                  className="mt-4 text-sm font-semibold text-[#e21d38] hover:underline"
-                >
-                  Load sample export instead
-                </button>
 
                 {fileName && (
                   <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm">
@@ -1350,10 +1236,10 @@ export default function Home() {
 
                 <div className="mt-4 space-y-3 text-sm text-slate-600">
                   <p>✓ One row represents a broadcaster, package or total.</p>
-                  <p>✓ Match count and package details are retained.</p>
-                  <p>✓ AAV remains separate from total cycle value.</p>
+                  <p>✓ AAV remains separate from cycle total.</p>
                   <p>✓ Market totals are excluded from deal roll-ups.</p>
-                  <p>✓ Only approved rows enter the tracker.</p>
+                  <p>✓ Missing values require human review.</p>
+                  <p>✓ Approved rows are saved in this browser.</p>
                 </div>
               </div>
             </section>
@@ -1391,10 +1277,8 @@ export default function Home() {
                         <th className="p-3">Market</th>
                         <th className="p-3">Broadcaster</th>
                         <th className="p-3">Package</th>
-                        <th className="p-3">Matches</th>
                         <th className="p-3">AAV</th>
                         <th className="p-3">Cycle total</th>
-                        <th className="p-3">Type</th>
                         <th className="p-3">Status</th>
                       </tr>
                     </thead>
@@ -1416,8 +1300,6 @@ export default function Home() {
                             {row.packageName || "Missing"}
                           </td>
 
-                          <td className="p-3">{row.matchCount || "—"}</td>
-
                           <td className="p-3">
                             {row.reportedAav
                               ? formatValue(
@@ -1435,8 +1317,6 @@ export default function Home() {
                                 )
                               : "Not found"}
                           </td>
-
-                          <td className="p-3">{row.recordType}</td>
 
                           <td className="p-3">
                             <span
@@ -1494,7 +1374,7 @@ export default function Home() {
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    Figures are held in this prototype session only.
+                    Inputs are saved in this browser.
                   </p>
                 </div>
 
