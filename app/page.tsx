@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 
 type Tab = "Rights Overview" | "SportBusiness Import" | "Commercial Inputs";
+type Region = "APAC" | "EMEA" | "AMERICAS";
+type Confidence = "High" | "Medium" | "Low";
 
 type Deal = {
   id: number;
@@ -21,21 +23,30 @@ type Deal = {
   recordType: "Deal" | "Market total";
   includeInRollup: boolean;
   source: string;
-  confidence: "High" | "Medium" | "Low";
+  confidence: Confidence;
 };
 
 type CommercialInput = {
   id: number;
+  region: Region;
   property: string;
   market: string;
   cycle: string;
   aav: string;
   cycleTotal: string;
   currency: string;
-  confidence: "High" | "Medium" | "Low";
+  confidence: Confidence;
+  packageDetails: string;
+  commentary: string;
+  matchesSportBusiness: boolean;
   owner: string;
   due: string;
 };
+
+type CommercialDraft = Omit<
+  CommercialInput,
+  "id" | "region" | "owner" | "due"
+>;
 
 type ImportedRow = {
   id: number;
@@ -62,6 +73,21 @@ const properties = [
   "Serie A",
   "Ligue 1",
   "WSL",
+];
+
+const regions: { id: Region; description: string }[] = [
+  {
+    id: "APAC",
+    description: "Asia-Pacific markets",
+  },
+  {
+    id: "EMEA",
+    description: "Europe, Middle East and Africa",
+  },
+  {
+    id: "AMERICAS",
+    description: "North, Central and South America",
+  },
 ];
 
 const initialDeals: Deal[] = [
@@ -127,7 +153,7 @@ const initialDeals: Deal[] = [
     market: "Germany",
     broadcaster: "DAZN",
     packageName: "National live package",
-    packageDetails: "Sample package detail to be confirmed.",
+    packageDetails: "Package detail to be confirmed.",
     rightsType: "Live",
     cycle: "2024–27",
     matchCount: null,
@@ -180,6 +206,7 @@ const initialDeals: Deal[] = [
 const initialCommercialInputs: CommercialInput[] = [
   {
     id: 1,
+    region: "EMEA",
     property: "UEFA Champions League",
     market: "United Kingdom",
     cycle: "2024–27",
@@ -187,11 +214,15 @@ const initialCommercialInputs: CommercialInput[] = [
     cycleTotal: "",
     currency: "USD",
     confidence: "Medium",
+    packageDetails: "",
+    commentary: "",
+    matchesSportBusiness: false,
     owner: "Football Commercial",
     due: "18 Oct 2026",
   },
   {
     id: 2,
+    region: "EMEA",
     property: "Premier League",
     market: "United Kingdom",
     cycle: "2025–29",
@@ -199,11 +230,15 @@ const initialCommercialInputs: CommercialInput[] = [
     cycleTotal: "",
     currency: "GBP",
     confidence: "Medium",
+    packageDetails: "",
+    commentary: "",
+    matchesSportBusiness: false,
     owner: "Football Commercial",
     due: "18 Oct 2026",
   },
   {
     id: 3,
+    region: "AMERICAS",
     property: "LaLiga",
     market: "United States",
     cycle: "2024–27",
@@ -211,6 +246,9 @@ const initialCommercialInputs: CommercialInput[] = [
     cycleTotal: "",
     currency: "USD",
     confidence: "Medium",
+    packageDetails: "",
+    commentary: "",
+    matchesSportBusiness: false,
     owner: "Americas Commercial",
     due: "25 Oct 2026",
   },
@@ -224,25 +262,86 @@ const STORAGE_KEYS = {
   approvedCount: "img-rights-tracker-approved-count",
 };
 
+function getRegionForMarket(market: string): Region {
+  const value = market.toLowerCase();
+
+  const americas = [
+    "united states",
+    "usa",
+    "canada",
+    "mexico",
+    "brazil",
+    "argentina",
+    "chile",
+    "colombia",
+  ];
+
+  const apac = [
+    "japan",
+    "china",
+    "australia",
+    "india",
+    "singapore",
+    "indonesia",
+    "malaysia",
+    "thailand",
+    "korea",
+    "new zealand",
+    "hong kong",
+  ];
+
+  if (americas.some((country) => value.includes(country))) {
+    return "AMERICAS";
+  }
+
+  if (apac.some((country) => value.includes(country))) {
+    return "APAC";
+  }
+
+  return "EMEA";
+}
+
+function createCommercialDraft(property: string): CommercialDraft {
+  return {
+    property,
+    market: "",
+    cycle: "2024–27",
+    aav: "",
+    cycleTotal: "",
+    currency: "EUR",
+    confidence: "Medium",
+    packageDetails: "",
+    commentary: "",
+    matchesSportBusiness: false,
+  };
+}
+
 function parseAmount(value: string): number | null {
   const cleaned = value.toLowerCase().replace(/,/g, "").trim();
 
-  if (!cleaned) return null;
+  if (!cleaned) {
+    return null;
+  }
 
   const number = Number.parseFloat(cleaned.replace(/[^\d.-]/g, ""));
 
-  if (Number.isNaN(number)) return null;
+  if (Number.isNaN(number)) {
+    return null;
+  }
 
   return cleaned.includes("bn") ? number * 1000 : number;
 }
 
 function parseMatchCount(value: string): number | null {
   const number = Number.parseInt(value.replace(/[^\d]/g, ""), 10);
+
   return Number.isNaN(number) ? null : number;
 }
 
 function formatValue(value: number | null, currency: string): string {
-  if (value === null || Number.isNaN(value)) return "—";
+  if (value === null || Number.isNaN(value)) {
+    return "—";
+  }
 
   const symbols: Record<string, string> = {
     EUR: "€",
@@ -285,16 +384,95 @@ function getDealKey(
     .join("|");
 }
 
+function normaliseDeal(raw: Partial<Deal>, index: number): Deal {
+  return {
+    id: Number(raw.id) || Date.now() + index,
+    property: String(raw.property ?? ""),
+    market: String(raw.market ?? ""),
+    broadcaster: String(raw.broadcaster ?? ""),
+    packageName: String(raw.packageName ?? ""),
+    packageDetails: String(raw.packageDetails ?? ""),
+    rightsType: String(raw.rightsType ?? ""),
+    cycle: String(raw.cycle ?? ""),
+    matchCount:
+      raw.matchCount === null || raw.matchCount === undefined
+        ? null
+        : Number(raw.matchCount),
+    aav:
+      raw.aav === null || raw.aav === undefined ? null : Number(raw.aav),
+    cycleTotal:
+      raw.cycleTotal === null || raw.cycleTotal === undefined
+        ? null
+        : Number(raw.cycleTotal),
+    currency: String(raw.currency ?? "EUR"),
+    recordType: raw.recordType === "Market total" ? "Market total" : "Deal",
+    includeInRollup: raw.includeInRollup !== false,
+    source: String(raw.source ?? "Unknown source"),
+    confidence:
+      raw.confidence === "High" ||
+      raw.confidence === "Low" ||
+      raw.confidence === "Medium"
+        ? raw.confidence
+        : "Medium",
+  };
+}
+
+function normaliseCommercialInput(
+  raw: Partial<CommercialInput>,
+  index: number
+): CommercialInput {
+  const market = String(raw.market ?? "");
+
+  return {
+    id: Number(raw.id) || Date.now() + index,
+    region:
+      raw.region === "APAC" ||
+      raw.region === "AMERICAS" ||
+      raw.region === "EMEA"
+        ? raw.region
+        : getRegionForMarket(market),
+    property: String(raw.property ?? ""),
+    market,
+    cycle: String(raw.cycle ?? "2024–27"),
+    aav: String(raw.aav ?? ""),
+    cycleTotal: String(raw.cycleTotal ?? ""),
+    currency: String(raw.currency ?? "EUR"),
+    confidence:
+      raw.confidence === "High" ||
+      raw.confidence === "Low" ||
+      raw.confidence === "Medium"
+        ? raw.confidence
+        : "Medium",
+    packageDetails: String(raw.packageDetails ?? ""),
+    commentary: String(raw.commentary ?? ""),
+    matchesSportBusiness: Boolean(raw.matchesSportBusiness),
+    owner: String(raw.owner ?? "Commercial team"),
+    due: String(raw.due ?? "Not assigned"),
+  };
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("Rights Overview");
+
   const [selectedProperty, setSelectedProperty] = useState<string | null>(
     null
   );
+
   const [selectedMarketKey, setSelectedMarketKey] = useState<string | null>(
     null
   );
 
+  const [selectedCommercialRegion, setSelectedCommercialRegion] =
+    useState<Region | null>(null);
+
+  const [selectedCommercialProperty, setSelectedCommercialProperty] =
+    useState<string | null>(null);
+
+  const [commercialDraft, setCommercialDraft] =
+    useState<CommercialDraft>(createCommercialDraft(""));
+
   const [deals, setDeals] = useState<Deal[]>(initialDeals);
+
   const [commercialInputs, setCommercialInputs] = useState<
     CommercialInput[]
   >(initialCommercialInputs);
@@ -320,13 +498,13 @@ export default function Home() {
       );
 
       if (savedDeals) {
-        setDeals(JSON.parse(savedDeals) as Deal[]);
+        const parsed = JSON.parse(savedDeals) as Partial<Deal>[];
+        setDeals(parsed.map(normaliseDeal));
       }
 
       if (savedInputs) {
-        setCommercialInputs(
-          JSON.parse(savedInputs) as CommercialInput[]
-        );
+        const parsed = JSON.parse(savedInputs) as Partial<CommercialInput>[];
+        setCommercialInputs(parsed.map(normaliseCommercialInput));
       }
 
       if (savedRows) {
@@ -338,7 +516,7 @@ export default function Home() {
       }
 
       if (savedApprovedCount) {
-        setApprovedCount(Number(savedApprovedCount));
+        setApprovedCount(Number(savedApprovedCount) || 0);
       }
     } catch {
       console.warn("Saved tracker data could not be loaded.");
@@ -348,7 +526,9 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated) {
+      return;
+    }
 
     localStorage.setItem(STORAGE_KEYS.deals, JSON.stringify(deals));
     localStorage.setItem(
@@ -393,7 +573,9 @@ export default function Home() {
   }, [deals, propertyList]);
 
   const marketSummaries = useMemo(() => {
-    if (!selectedProperty) return [];
+    if (!selectedProperty) {
+      return [];
+    }
 
     const propertyDeals = deals.filter(
       (deal) => deal.property === selectedProperty
@@ -411,7 +593,7 @@ export default function Home() {
     >();
 
     propertyDeals.forEach((deal) => {
-      const key = `${deal.market}-${deal.cycle}`;
+      const key = `${deal.market}::${deal.cycle}`;
 
       if (!grouped.has(key)) {
         grouped.set(key, {
@@ -431,18 +613,22 @@ export default function Home() {
         (row) => row.recordType === "Market total"
       );
 
-      const dealAav = group.rows
-        .filter((row) => row.includeInRollup)
-        .reduce((total, row) => total + (row.aav ?? 0), 0);
+      const dealRows = group.rows.filter((row) => row.includeInRollup);
 
-      const dealCycleTotal = group.rows
-        .filter((row) => row.includeInRollup)
-        .reduce((total, row) => total + (row.cycleTotal ?? 0), 0);
+      const dealAav = dealRows.reduce(
+        (total, row) => total + (row.aav ?? 0),
+        0
+      );
+
+      const dealCycleTotal = dealRows.reduce(
+        (total, row) => total + (row.cycleTotal ?? 0),
+        0
+      );
 
       const commercial = commercialInputs.find(
         (input) =>
           input.property === group.property &&
-          input.market === group.market &&
+          input.market.toLowerCase() === group.market.toLowerCase() &&
           input.cycle === group.cycle
       );
 
@@ -451,9 +637,15 @@ export default function Home() {
         sportBusinessAav: marketTotal?.aav ?? (dealAav || null),
         sportBusinessTotal:
           marketTotal?.cycleTotal ?? (dealCycleTotal || null),
-        commercialAav: commercial ? parseAmount(commercial.aav) : null,
+        commercialAav: commercial
+          ? commercial.matchesSportBusiness
+            ? marketTotal?.aav ?? (dealAav || null)
+            : parseAmount(commercial.aav)
+          : null,
         commercialTotal: commercial
-          ? parseAmount(commercial.cycleTotal)
+          ? commercial.matchesSportBusiness
+            ? marketTotal?.cycleTotal ?? (dealCycleTotal || null)
+            : parseAmount(commercial.cycleTotal)
           : null,
         commercial,
       };
@@ -466,7 +658,7 @@ export default function Home() {
 
   const selectedMarket = marketSummaries.find(
     (market) =>
-      `${market.market}-${market.cycle}` === selectedMarketKey
+      `${market.market}::${market.cycle}` === selectedMarketKey
   );
 
   const breakdownDeals = selectedDeals.filter(
@@ -477,7 +669,7 @@ export default function Home() {
   );
 
   const completedCommercialInputs = commercialInputs.filter(
-    (input) => input.aav.trim() || input.cycleTotal.trim()
+    (input) => input.aav.trim() || input.cycleTotal.trim() || input.matchesSportBusiness
   ).length;
 
   const readyToApprove = importRows.filter(
@@ -488,30 +680,43 @@ export default function Home() {
     setActiveTab(tab);
     setSelectedProperty(null);
     setSelectedMarketKey(null);
+    setSelectedCommercialRegion(null);
+    setSelectedCommercialProperty(null);
   }
 
-  function updateCommercial(
-    id: number,
-    field: "aav" | "cycleTotal" | "confidence",
-    value: string
+  function getSportBusinessValues(
+    property: string,
+    market: string,
+    cycle: string
   ) {
-    setCommercialInputs((current) =>
-      current.map((input) => {
-        if (input.id !== id) return input;
-
-        if (field === "confidence") {
-          return {
-            ...input,
-            confidence: value as CommercialInput["confidence"],
-          };
-        }
-
-        return {
-          ...input,
-          [field]: value,
-        };
-      })
+    const rows = deals.filter(
+      (deal) =>
+        deal.property === property &&
+        deal.market.toLowerCase() === market.toLowerCase() &&
+        deal.cycle === cycle
     );
+
+    const marketTotal = rows.find(
+      (row) => row.recordType === "Market total"
+    );
+
+    const dealRows = rows.filter((row) => row.includeInRollup);
+
+    const dealAav = dealRows.reduce(
+      (total, row) => total + (row.aav ?? 0),
+      0
+    );
+
+    const dealCycleTotal = dealRows.reduce(
+      (total, row) => total + (row.cycleTotal ?? 0),
+      0
+    );
+
+    return {
+      aav: marketTotal?.aav ?? (dealAav || null),
+      cycleTotal: marketTotal?.cycleTotal ?? (dealCycleTotal || null),
+      currency: marketTotal?.currency ?? rows[0]?.currency ?? "EUR",
+    };
   }
 
   function updateDeal(
@@ -521,7 +726,9 @@ export default function Home() {
   ) {
     setDeals((current) =>
       current.map((deal) => {
-        if (deal.id !== id) return deal;
+        if (deal.id !== id) {
+          return deal;
+        }
 
         if (field === "matchCount") {
           return {
@@ -538,10 +745,87 @@ export default function Home() {
     );
   }
 
+  function setCommercialMatch(checked: boolean) {
+    const benchmark = getSportBusinessValues(
+      selectedCommercialProperty ?? "",
+      commercialDraft.market,
+      commercialDraft.cycle
+    );
+
+    setCommercialDraft((current) => ({
+      ...current,
+      matchesSportBusiness: checked,
+      aav:
+        checked && benchmark.aav !== null
+          ? String(benchmark.aav)
+          : current.aav,
+      cycleTotal:
+        checked && benchmark.cycleTotal !== null
+          ? String(benchmark.cycleTotal)
+          : current.cycleTotal,
+      currency: checked ? benchmark.currency : current.currency,
+    }));
+  }
+
+  function saveCommercialInput() {
+    if (
+      !selectedCommercialRegion ||
+      !selectedCommercialProperty ||
+      !commercialDraft.market.trim() ||
+      !commercialDraft.cycle.trim()
+    ) {
+      return;
+    }
+
+    const newInput: CommercialInput = {
+      id: Date.now(),
+      region: selectedCommercialRegion,
+      property: selectedCommercialProperty,
+      market: commercialDraft.market.trim(),
+      cycle: commercialDraft.cycle.trim(),
+      aav: commercialDraft.aav,
+      cycleTotal: commercialDraft.cycleTotal,
+      currency: commercialDraft.currency,
+      confidence: commercialDraft.confidence,
+      packageDetails: commercialDraft.packageDetails,
+      commentary: commercialDraft.commentary,
+      matchesSportBusiness: commercialDraft.matchesSportBusiness,
+      owner: "Commercial team",
+      due: "Not assigned",
+    };
+
+    setCommercialInputs((current) => {
+      const existingIndex = current.findIndex(
+        (input) =>
+          input.property === newInput.property &&
+          input.market.toLowerCase() === newInput.market.toLowerCase() &&
+          input.cycle === newInput.cycle
+      );
+
+      if (existingIndex === -1) {
+        return [...current, newInput];
+      }
+
+      return current.map((input, index) =>
+        index === existingIndex ? { ...newInput, id: input.id } : input
+      );
+    });
+
+    setCommercialDraft(createCommercialDraft(selectedCommercialProperty));
+  }
+
+  function removeCommercialInput(id: number) {
+    setCommercialInputs((current) =>
+      current.filter((input) => input.id !== id)
+    );
+  }
+
   async function handleFileUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     setFileName(file.name);
     setImportMessage("Reading export and mapping recognised columns...");
@@ -717,7 +1001,7 @@ export default function Home() {
     setImportMessage(
       `${rowsToApprove.length} row${
         rowsToApprove.length === 1 ? "" : "s"
-      } approved. The data is saved in this browser.`
+      } approved and saved in this browser.`
     );
   }
 
@@ -914,7 +1198,7 @@ export default function Home() {
 
                   <tbody>
                     {marketSummaries.map((market) => {
-                      const marketKey = `${market.market}-${market.cycle}`;
+                      const marketKey = `${market.market}::${market.cycle}`;
 
                       const difference =
                         market.commercialAav !== null &&
@@ -934,16 +1218,20 @@ export default function Home() {
                         >
                           <td className="p-3">
                             <button
-                             onClick={() => {
-  setSelectedMarketKey(marketKey);
+                              onClick={() => {
+                                setSelectedMarketKey(marketKey);
 
-  setTimeout(() => {
-    document
-      .getElementById("broadcaster-breakdown")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, 100);
-}}
-
+                                setTimeout(() => {
+                                  document
+                                    .getElementById(
+                                      "broadcaster-breakdown"
+                                    )
+                                    ?.scrollIntoView({
+                                      behavior: "smooth",
+                                      block: "start",
+                                    });
+                                }, 100);
+                              }}
                               className="text-left"
                             >
                               <div className="font-semibold text-[#10233f]">
@@ -1010,11 +1298,10 @@ export default function Home() {
               </div>
             </section>
 
-           <section
-  id="broadcaster-breakdown"
-  className="scroll-mt-6 rounded-xl bg-white p-6 shadow-sm"
->
-
+            <section
+              id="broadcaster-breakdown"
+              className="scroll-mt-6 rounded-xl bg-white p-6 shadow-sm"
+            >
               {!selectedMarket ? (
                 <div className="rounded-xl border-2 border-dashed border-slate-200 p-10 text-center">
                   <h2 className="text-lg font-bold">
@@ -1343,159 +1630,497 @@ export default function Home() {
 
         {activeTab === "Commercial Inputs" && (
           <>
-            <div className="mb-8">
-              <p className="text-sm font-semibold uppercase tracking-widest text-[#e21d38]">
-                Input workflow
-              </p>
+            {!selectedCommercialRegion && (
+              <>
+                <div className="mb-8">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-[#e21d38]">
+                    Commercial workspace
+                  </p>
 
-              <h1 className="mt-2 text-3xl font-bold">Commercial Inputs</h1>
+                  <h1 className="mt-2 text-3xl font-bold">
+                    Select your region
+                  </h1>
 
-              <p className="mt-2 text-slate-600">
-                Enter the IMG commercial view separately from SportBusiness
-                reported figures.
-              </p>
-            </div>
-
-            <section className="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
-              <h2 className="font-bold text-[#8e1023]">
-                IMG commercial view
-              </h2>
-
-              <p className="mt-1 text-sm text-[#8e1023]">
-                These values do not overwrite SportBusiness records.
-              </p>
-            </section>
-
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">
-                    Submit market intelligence
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Inputs are saved in this browser.
+                  <p className="mt-2 text-slate-600">
+                    Choose a region to see its properties and add market
+                    intelligence.
                   </p>
                 </div>
 
-                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-[#a31328]">
-                  {completedCommercialInputs}/{commercialInputs.length} complete
-                </span>
-              </div>
+                <section className="grid gap-5 md:grid-cols-3">
+                  {regions.map((region) => {
+                    const regionInputs = commercialInputs.filter(
+                      (input) => input.region === region.id
+                    );
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b text-xs uppercase tracking-wide text-slate-500">
-                      <th className="p-3">Property</th>
-                      <th className="p-3">Market</th>
-                      <th className="p-3">SportBusiness AAV</th>
-                      <th className="bg-red-50 p-3 text-[#a31328]">
-                        IMG AAV
-                      </th>
-                      <th className="bg-red-50 p-3 text-[#a31328]">
-                        IMG cycle total
-                      </th>
-                      <th className="bg-red-50 p-3 text-[#a31328]">
-                        Confidence
-                      </th>
-                      <th className="p-3">Owner / due</th>
-                    </tr>
-                  </thead>
+                    const completed = regionInputs.filter(
+                      (input) =>
+                        input.aav ||
+                        input.cycleTotal ||
+                        input.matchesSportBusiness
+                    ).length;
 
-                  <tbody>
-                    {commercialInputs.map((input) => {
-                      const matchingDeals = deals.filter(
-                        (deal) =>
-                          deal.property === input.property &&
-                          deal.market === input.market &&
-                          deal.cycle === input.cycle &&
-                          deal.includeInRollup
-                      );
+                    return (
+                      <button
+                        key={region.id}
+                        onClick={() => {
+                          setSelectedCommercialRegion(region.id);
+                          setSelectedCommercialProperty(null);
+                        }}
+                        className="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                      >
+                        <p className="text-xs font-semibold uppercase tracking-widest text-[#e21d38]">
+                          Region
+                        </p>
 
-                      const benchmarkAav = matchingDeals.reduce(
-                        (total, deal) => total + (deal.aav ?? 0),
-                        0
+                        <h2 className="mt-2 text-2xl font-bold">
+                          {region.id}
+                        </h2>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                          {region.description}
+                        </p>
+
+                        <div className="mt-6 flex justify-between text-sm">
+                          <span>
+                            <strong>{regionInputs.length}</strong> views
+                          </span>
+
+                          <span>
+                            <strong>{completed}</strong> complete
+                          </span>
+                        </div>
+
+                        <div className="mt-6 font-semibold text-[#10233f]">
+                          Open region →
+                        </div>
+                      </button>
+                    );
+                  })}
+                </section>
+              </>
+            )}
+
+            {selectedCommercialRegion && !selectedCommercialProperty && (
+              <>
+                <button
+                  onClick={() => setSelectedCommercialRegion(null)}
+                  className="mb-6 text-sm font-semibold text-[#e21d38]"
+                >
+                  ← Back to regions
+                </button>
+
+                <div className="mb-8">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-[#e21d38]">
+                    {selectedCommercialRegion}
+                  </p>
+
+                  <h1 className="mt-2 text-3xl font-bold">
+                    Select a property
+                  </h1>
+
+                  <p className="mt-2 text-slate-600">
+                    Choose a property to add or review market views.
+                  </p>
+                </div>
+
+                <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                  {propertyList.map((property) => {
+                    const submissions = commercialInputs.filter(
+                      (input) =>
+                        input.property === property &&
+                        input.region === selectedCommercialRegion
+                    );
+
+                    return (
+                      <button
+                        key={property}
+                        onClick={() => {
+                          setSelectedCommercialProperty(property);
+                          setCommercialDraft(createCommercialDraft(property));
+                        }}
+                        className="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                      >
+                        <p className="text-xs font-semibold uppercase tracking-widest text-[#e21d38]">
+                          Football property
+                        </p>
+
+                        <h2 className="mt-2 text-xl font-bold">
+                          {property}
+                        </h2>
+
+                        <p className="mt-4 text-sm text-slate-500">
+                          {submissions.length} saved view
+                          {submissions.length === 1 ? "" : "s"}
+                        </p>
+
+                        <div className="mt-6 font-semibold text-[#10233f]">
+                          Open property →
+                        </div>
+                      </button>
+                    );
+                  })}
+                </section>
+              </>
+            )}
+
+            {selectedCommercialRegion && selectedCommercialProperty && (
+              <>
+                <button
+                  onClick={() => setSelectedCommercialProperty(null)}
+                  className="mb-6 text-sm font-semibold text-[#e21d38]"
+                >
+                  ← Back to {selectedCommercialRegion} properties
+                </button>
+
+                <div className="mb-8">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-[#e21d38]">
+                    Commercial input
+                  </p>
+
+                  <h1 className="mt-2 text-3xl font-bold">
+                    {selectedCommercialProperty}
+                  </h1>
+
+                  <p className="mt-2 text-slate-600">
+                    Add a market view or confirm that SportBusiness is
+                    accurate.
+                  </p>
+                </div>
+
+                <section className="mb-8 rounded-xl bg-white p-6 shadow-sm">
+                  <h2 className="text-xl font-bold">
+                    Add market intelligence
+                  </h2>
+
+                  <div className="mt-6 grid gap-5 md:grid-cols-2">
+                    <label className="text-sm font-semibold">
+                      Country / market
+                      <input
+                        value={commercialDraft.market}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            market: event.target.value,
+                            matchesSportBusiness: false,
+                          })
+                        }
+                        placeholder="e.g. United Kingdom"
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold">
+                      Rights cycle
+                      <input
+                        value={commercialDraft.cycle}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            cycle: event.target.value,
+                            matchesSportBusiness: false,
+                          })
+                        }
+                        placeholder="e.g. 2024–27"
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold">
+                      AAV
+                      <input
+                        value={commercialDraft.aav}
+                        disabled={commercialDraft.matchesSportBusiness}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            aav: event.target.value,
+                          })
+                        }
+                        placeholder="Value in millions"
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal disabled:bg-slate-100"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold">
+                      Total over cycle
+                      <input
+                        value={commercialDraft.cycleTotal}
+                        disabled={commercialDraft.matchesSportBusiness}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            cycleTotal: event.target.value,
+                          })
+                        }
+                        placeholder="Total value"
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal disabled:bg-slate-100"
+                      />
+                    </label>
+
+                    <label className="text-sm font-semibold">
+                      Currency
+                      <select
+                        value={commercialDraft.currency}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            currency: event.target.value,
+                          })
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      >
+                        <option>EUR</option>
+                        <option>GBP</option>
+                        <option>USD</option>
+                        <option>JPY</option>
+                      </select>
+                    </label>
+
+                    <label className="text-sm font-semibold">
+                      Confidence
+                      <select
+                        value={commercialDraft.confidence}
+                        onChange={(event) =>
+                          setCommercialDraft({
+                            ...commercialDraft,
+                            confidence: event.target.value as Confidence,
+                          })
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      >
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    {(() => {
+                      const benchmark = getSportBusinessValues(
+                        selectedCommercialProperty,
+                        commercialDraft.market,
+                        commercialDraft.cycle
                       );
 
                       return (
-                        <tr
-                          key={input.id}
-                          className="border-b last:border-0"
-                        >
-                          <td className="p-3 font-semibold">
-                            {input.property}
-                          </td>
-
-                          <td className="p-3">{input.market}</td>
-
-                          <td className="p-3 text-blue-900">
-                            {benchmarkAav
-                              ? formatValue(benchmarkAav, input.currency)
-                              : "—"}
-                          </td>
-
-                          <td className="bg-red-50 p-3">
+                        <>
+                          <label className="flex items-start gap-3">
                             <input
-                              value={input.aav}
+                              type="checkbox"
+                              checked={commercialDraft.matchesSportBusiness}
+                              disabled={benchmark.aav === null}
                               onChange={(event) =>
-                                updateCommercial(
-                                  input.id,
-                                  "aav",
-                                  event.target.value
-                                )
+                                setCommercialMatch(event.target.checked)
                               }
-                              placeholder="AAV in millions"
-                              className="w-36 rounded-lg border border-red-200 bg-white px-3 py-2 outline-none focus:border-[#e21d38] focus:ring-2 focus:ring-red-100"
+                              className="mt-1 h-4 w-4"
                             />
-                          </td>
 
-                          <td className="bg-red-50 p-3">
-                            <input
-                              value={input.cycleTotal}
-                              onChange={(event) =>
-                                updateCommercial(
-                                  input.id,
-                                  "cycleTotal",
-                                  event.target.value
-                                )
-                              }
-                              placeholder="Cycle total"
-                              className="w-36 rounded-lg border border-red-200 bg-white px-3 py-2 outline-none focus:border-[#e21d38] focus:ring-2 focus:ring-red-100"
-                            />
-                          </td>
+                            <span className="text-sm">
+                              <strong>
+                                SportBusiness data is accurate
+                              </strong>
+                              <br />
+                              Use the SportBusiness market total automatically
+                              instead of entering a separate IMG figure.
+                            </span>
+                          </label>
 
-                          <td className="bg-red-50 p-3">
-                            <select
-                              value={input.confidence}
-                              onChange={(event) =>
-                                updateCommercial(
-                                  input.id,
-                                  "confidence",
-                                  event.target.value
-                                )
-                              }
-                              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm"
-                            >
-                              <option>High</option>
-                              <option>Medium</option>
-                              <option>Low</option>
-                            </select>
-                          </td>
-
-                          <td className="p-3 text-sm text-slate-600">
-                            <div>{input.owner}</div>
-                            <div className="mt-1 font-medium">
-                              Due {input.due}
-                            </div>
-                          </td>
-                        </tr>
+                          {benchmark.aav !== null ? (
+                            <p className="mt-3 text-sm text-blue-900">
+                              Matching SportBusiness record:{" "}
+                              <strong>
+                                {formatValue(
+                                  benchmark.aav,
+                                  benchmark.currency
+                                )}{" "}
+                                AAV
+                              </strong>{" "}
+                              /{" "}
+                              <strong>
+                                {formatValue(
+                                  benchmark.cycleTotal,
+                                  benchmark.currency
+                                )}{" "}
+                                total
+                              </strong>
+                            </p>
+                          ) : (
+                            <p className="mt-3 text-sm text-blue-800">
+                              No matching SportBusiness record found for this
+                              market and cycle yet.
+                            </p>
+                          )}
+                        </>
                       );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+                    })()}
+                  </div>
+
+                  <label className="mt-6 block text-sm font-semibold">
+                    Package / deal details
+                    <textarea
+                      value={commercialDraft.packageDetails}
+                      onChange={(event) =>
+                        setCommercialDraft({
+                          ...commercialDraft,
+                          packageDetails: event.target.value,
+                        })
+                      }
+                      rows={3}
+                      placeholder="Broadcaster, package, match count or other detail"
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="mt-6 block text-sm font-semibold">
+                    Commentary / insight
+                    <textarea
+                      value={commercialDraft.commentary}
+                      onChange={(event) =>
+                        setCommercialDraft({
+                          ...commercialDraft,
+                          commentary: event.target.value,
+                        })
+                      }
+                      rows={3}
+                      placeholder="Add context, rationale or market intelligence"
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <button
+                    onClick={saveCommercialInput}
+                    disabled={
+                      !commercialDraft.market.trim() ||
+                      !commercialDraft.cycle.trim()
+                    }
+                    className="mt-6 rounded-lg bg-[#e21d38] px-5 py-3 font-semibold text-white disabled:opacity-40"
+                  >
+                    Save market view
+                  </button>
+                </section>
+
+                <section className="rounded-xl bg-white p-6 shadow-sm">
+                  <h2 className="text-xl font-bold">
+                    Saved commercial views
+                  </h2>
+
+                  <div className="mt-5 space-y-4">
+                    {commercialInputs
+                      .filter(
+                        (input) =>
+                          input.property === selectedCommercialProperty &&
+                          input.region === selectedCommercialRegion
+                      )
+                      .map((input) => {
+                        const benchmark = getSportBusinessValues(
+                          input.property,
+                          input.market,
+                          input.cycle
+                        );
+
+                        const displayAav = input.matchesSportBusiness
+                          ? benchmark.aav
+                          : parseAmount(input.aav);
+
+                        const displayTotal = input.matchesSportBusiness
+                          ? benchmark.cycleTotal
+                          : parseAmount(input.cycleTotal);
+
+                        return (
+                          <div
+                            key={input.id}
+                            className="rounded-xl border border-slate-200 p-5"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-bold">
+                                  {input.market}
+                                </h3>
+
+                                <p className="text-sm text-slate-500">
+                                  {input.cycle} · {input.confidence} confidence
+                                </p>
+                              </div>
+
+                              <button
+                                onClick={() =>
+                                  removeCommercialInput(input.id)
+                                }
+                                className="text-sm font-semibold text-red-600"
+                              >
+                                Remove
+                              </button>
+                            </div>
+
+                            <div className="mt-4 grid gap-4 md:grid-cols-3">
+                              <div>
+                                <p className="text-xs uppercase text-slate-500">
+                                  AAV
+                                </p>
+
+                                <p className="mt-1 font-bold">
+                                  {formatValue(displayAav, input.currency)}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="text-xs uppercase text-slate-500">
+                                  Cycle total
+                                </p>
+
+                                <p className="mt-1 font-bold">
+                                  {formatValue(
+                                    displayTotal,
+                                    input.currency
+                                  )}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="text-xs uppercase text-slate-500">
+                                  Source
+                                </p>
+
+                                <p className="mt-1 font-bold">
+                                  {input.matchesSportBusiness
+                                    ? "SportBusiness confirmed"
+                                    : "IMG commercial view"}
+                                </p>
+                              </div>
+                            </div>
+
+                            {input.packageDetails && (
+                              <p className="mt-4 text-sm text-slate-600">
+                                <strong>Package:</strong>{" "}
+                                {input.packageDetails}
+                              </p>
+                            )}
+
+                            {input.commentary && (
+                              <p className="mt-2 text-sm text-slate-600">
+                                <strong>Insight:</strong>{" "}
+                                {input.commentary}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                    {commercialInputs.filter(
+                      (input) =>
+                        input.property === selectedCommercialProperty &&
+                        input.region === selectedCommercialRegion
+                    ).length === 0 && (
+                      <p className="rounded-lg bg-slate-50 p-6 text-sm text-slate-500">
+                        No commercial views added yet.
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </>
+            )}
           </>
         )}
       </div>
