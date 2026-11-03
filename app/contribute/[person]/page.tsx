@@ -78,6 +78,7 @@ const PROFILES: Record<string, ContributorProfile> = {
       "Other EMEA market",
     ],
   },
+
   "jordi-hernandez": {
     name: "Jordi Hernandez",
     email: "jordi.hernandez@img.com",
@@ -150,7 +151,10 @@ const SPORTBUSINESS_DEALS: Deal[] = [
   },
 ];
 
-function formatCurrency(value: number, currency: string) {
+function formatCurrency(
+  value: number,
+  currency: string
+) {
   try {
     return new Intl.NumberFormat("en-GB", {
       style: "currency",
@@ -162,13 +166,36 @@ function formatCurrency(value: number, currency: string) {
   }
 }
 
+function getCycleLength(cycle: string) {
+  const match = cycle.match(/(\d{4}).*?(\d{2,4})/);
+
+  if (!match) {
+    return 1;
+  }
+
+  const startYear = Number(match[1]);
+
+  let endYear = Number(match[2]);
+
+  if (endYear < 100) {
+    endYear += 2000;
+  }
+
+  return Math.max(1, endYear - startYear);
+}
+
 function ContributorPageContent() {
   const params = useParams<{ person: string }>();
   const profile = PROFILES[String(params.person)];
 
-  const [inputs, setInputs] = useState<CommercialInput[]>([]);
-  const [property, setProperty] =
-    useState("UEFA Champions League");
+  const [inputs, setInputs] = useState<CommercialInput[]>(
+    []
+  );
+
+  const [property, setProperty] = useState(
+    "UEFA Champions League"
+  );
+
   const [market, setMarket] = useState("");
   const [cycle, setCycle] = useState("2024–27");
   const [currency, setCurrency] = useState("EUR");
@@ -176,7 +203,8 @@ function ContributorPageContent() {
   const [cycleTotal, setCycleTotal] = useState("");
   const [confidence, setConfidence] =
     useState<Confidence>("Medium");
-  const [packageDetails, setPackageDetails] = useState("");
+  const [packageDetails, setPackageDetails] =
+    useState("");
   const [commentary, setCommentary] = useState("");
   const [matchesSportBusiness, setMatchesSportBusiness] =
     useState(false);
@@ -220,7 +248,60 @@ function ContributorPageContent() {
     );
   }, [inputs, profile]);
 
-  function submitContribution(event: FormEvent) {
+  function clearSportBusinessSelection() {
+    setMatchesSportBusiness(false);
+    setAav("");
+    setCycleTotal("");
+  }
+
+  function handleSportBusinessChange(
+    checked: boolean
+  ) {
+    setMatchesSportBusiness(checked);
+
+    if (
+      checked &&
+      sportBusinessRecords.length > 0
+    ) {
+      const totalValue =
+        sportBusinessRecords.reduce(
+          (sum, deal) => sum + deal.value,
+          0
+        );
+
+      const referenceCycle =
+        sportBusinessRecords[0].cycle;
+
+      const cycleLength =
+        getCycleLength(referenceCycle);
+
+      const annualAverageValue =
+        totalValue / cycleLength;
+
+      setAav(
+        String(Math.round(annualAverageValue))
+      );
+
+      setCycleTotal(
+        String(Math.round(totalValue))
+      );
+
+      setCurrency(
+        sportBusinessRecords[0].currency
+      );
+
+      setCycle(referenceCycle);
+    }
+
+    if (!checked) {
+      setAav("");
+      setCycleTotal("");
+    }
+  }
+
+  function submitContribution(
+    event: FormEvent
+  ) {
     event.preventDefault();
 
     if (!profile || !market || !cycle) {
@@ -280,7 +361,9 @@ function ContributorPageContent() {
       JSON.stringify(nextInputs)
     );
 
-    setMessage(`Contribution saved for ${market}.`);
+    setMessage(
+      `Contribution saved for ${market}.`
+    );
 
     setAav("");
     setCycleTotal("");
@@ -296,6 +379,7 @@ function ContributorPageContent() {
           <h1 className="text-2xl font-bold">
             Contributor link not found
           </h1>
+
           <p className="mt-3 text-slate-500">
             This contributor profile does not exist.
           </p>
@@ -339,18 +423,20 @@ function ContributorPageContent() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500">
-              Review the SportBusiness data before submitting your
-              commercial input.
+              Review the SportBusiness data before
+              submitting your commercial input.
             </p>
 
             <div className="mt-6 space-y-5">
               <label className="block text-sm font-semibold">
                 Property
+
                 <select
                   value={property}
-                  onChange={(event) =>
-                    setProperty(event.target.value)
-                  }
+                  onChange={(event) => {
+                    setProperty(event.target.value);
+                    clearSportBusinessSelection();
+                  }}
                   className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
                 >
                   {PROPERTIES.map((item) => (
@@ -361,11 +447,13 @@ function ContributorPageContent() {
 
               <label className="block text-sm font-semibold">
                 Market
+
                 <select
                   value={market}
-                  onChange={(event) =>
-                    setMarket(event.target.value)
-                  }
+                  onChange={(event) => {
+                    setMarket(event.target.value);
+                    clearSportBusinessSelection();
+                  }}
                   className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
                 >
                   {profile.markets.map((item) => (
@@ -380,8 +468,8 @@ function ContributorPageContent() {
                 </p>
 
                 <p className="mt-2 text-sm text-blue-900">
-                  Review the reference data below before entering
-                  your commercial input.
+                  Review the reference data below before
+                  entering your commercial input.
                 </p>
 
                 {sportBusinessRecords.length > 0 ? (
@@ -414,9 +502,9 @@ function ContributorPageContent() {
                   </div>
                 ) : (
                   <p className="mt-4 rounded-lg bg-white p-3 text-sm text-slate-600">
-                    No SportBusiness record is currently available
-                    for this market. Please provide the commercial
-                    input if you have relevant information.
+                    No SportBusiness record is currently
+                    available for this market. Please enter
+                    your own commercial view.
                   </p>
                 )}
               </div>
@@ -424,6 +512,7 @@ function ContributorPageContent() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-semibold">
                   Rights cycle
+
                   <input
                     value={cycle}
                     onChange={(event) =>
@@ -435,6 +524,7 @@ function ContributorPageContent() {
 
                 <label className="block text-sm font-semibold">
                   Currency
+
                   <select
                     value={currency}
                     onChange={(event) =>
@@ -453,6 +543,7 @@ function ContributorPageContent() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-semibold">
                   Annual average value
+
                   <input
                     value={aav}
                     onChange={(event) =>
@@ -465,6 +556,7 @@ function ContributorPageContent() {
 
                 <label className="block text-sm font-semibold">
                   Total cycle value
+
                   <input
                     value={cycleTotal}
                     onChange={(event) =>
@@ -478,6 +570,7 @@ function ContributorPageContent() {
 
               <label className="block text-sm font-semibold">
                 Confidence
+
                 <select
                   value={confidence}
                   onChange={(event) =>
@@ -495,6 +588,7 @@ function ContributorPageContent() {
 
               <label className="block text-sm font-semibold">
                 Package or rights details
+
                 <textarea
                   value={packageDetails}
                   onChange={(event) =>
@@ -507,6 +601,7 @@ function ContributorPageContent() {
 
               <label className="block text-sm font-semibold">
                 Additional commentary
+
                 <textarea
                   value={commentary}
                   onChange={(event) =>
@@ -517,21 +612,39 @@ function ContributorPageContent() {
                 />
               </label>
 
-              <label className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold">
-                <input
-                  type="checkbox"
-                  checked={matchesSportBusiness}
-                  onChange={(event) =>
-                    setMatchesSportBusiness(
-                      event.target.checked
-                    )
-                  }
-                />
+              {sportBusinessRecords.length > 0 && (
+                <label className="rounded-xl bg-slate-50 p-4 text-sm">
+                  <span className="flex items-center gap-3 font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={matchesSportBusiness}
+                      onChange={(event) =>
+                        handleSportBusinessChange(
+                          event.target.checked
+                        )
+                      }
+                    />
 
-                {sportBusinessRecords.length > 0
-                  ? "I have reviewed the SportBusiness data above"
-                  : "I have reviewed the available information"}
-              </label>
+                    SportBusiness data is correct
+                  </span>
+
+                  <span className="mt-2 block pl-7 text-xs font-normal text-slate-500">
+                    Selecting this will automatically
+                    populate the AAV and total cycle value
+                    above. Leave this unchecked and enter
+                    your own figures if your view differs
+                    from the SportBusiness data.
+                  </span>
+                </label>
+              )}
+
+              {sportBusinessRecords.length === 0 && (
+                <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                  No SportBusiness record is available for
+                  this market. Please enter your own
+                  commercial view.
+                </div>
+              )}
 
               <button
                 type="submit"
