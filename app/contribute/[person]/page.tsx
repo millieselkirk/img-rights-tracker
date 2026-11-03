@@ -1,6 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useParams } from "next/navigation";
 
 type Region = "EMEA" | "APAC" | "AMERICAS";
@@ -77,7 +83,7 @@ const PROPERTIES = [
   "LaLiga",
 ];
 
-export default function ContributorPage() {
+function ContributorPageContent() {
   const params = useParams<{ person: string }>();
   const profile = PROFILES[String(params.person)];
 
@@ -130,7 +136,9 @@ export default function ContributorPage() {
   function submitContribution(event: FormEvent) {
     event.preventDefault();
 
-    if (!profile || !market || !cycle) return;
+    if (!profile || !market || !cycle) {
+      return;
+    }
 
     const now = new Date().toISOString();
 
@@ -163,7 +171,7 @@ export default function ContributorPage() {
         input.cycle === cycle
     );
 
-    const next =
+    const nextInputs =
       existingIndex === -1
         ? [...inputs, newInput]
         : inputs.map((input, index) =>
@@ -178,10 +186,14 @@ export default function ContributorPage() {
               : input
           );
 
-    setInputs(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setInputs(nextInputs);
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(nextInputs)
+    );
 
     setMessage(`Contribution saved for ${market}.`);
+
     setAav("");
     setCycleTotal("");
     setPackageDetails("");
@@ -311,6 +323,7 @@ export default function ContributorPage() {
                     onChange={(event) =>
                       setAav(event.target.value)
                     }
+                    placeholder="Optional"
                     className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
                   />
                 </label>
@@ -322,6 +335,7 @@ export default function ContributorPage() {
                     onChange={(event) =>
                       setCycleTotal(event.target.value)
                     }
+                    placeholder="Optional"
                     className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
                   />
                 </label>
@@ -434,5 +448,21 @@ export default function ContributorPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ContributorPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-slate-100">
+          <p className="text-slate-600">
+            Loading contributor view...
+          </p>
+        </main>
+      }
+    >
+      <ContributorPageContent />
+    </Suspense>
   );
 }
