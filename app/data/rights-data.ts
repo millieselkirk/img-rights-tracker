@@ -1,6 +1,6 @@
 export type Region = "EMEA" | "APAC" | "AMERICAS";
 
-export type RightsDeal = { id:number; property:string; market:string; region:Region; broadcaster:string; package:string; cycle:string; value:number; currency:string; source:string; imgProperty?:boolean; };
+export type RightsDeal = { id:number; property:string; market:string; region:Region; broadcaster:string; package:string; packageDetails?:string; rightsType?:string; matchCount?:string; cycle:string; value:number; currency:string; source:string; imgProperty?:boolean; };
 
 export const SPORTBUSINESS_DEALS: RightsDeal[] = [
   {
@@ -13,7 +13,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 1500300000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, free-to-air, linear and streaming rights.",
+    "rightsType": "Live / free-to-air / linear / streaming",
+    "matchCount": ""
   },
   {
     "id": 2,
@@ -25,7 +28,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 1109700000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "172 live matches; all Tuesday nights, all Wednesday nights and the final. Also includes UEFA Europa League, UEFA Europa Conference League and UEFA Super Cup.",
+    "rightsType": "Live",
+    "matchCount": "172"
   },
   {
     "id": 3,
@@ -37,7 +43,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 1054200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, free-to-air and linear rights as reported.",
+    "rightsType": "Live / free-to-air / linear",
+    "matchCount": ""
   },
   {
     "id": 4,
@@ -49,7 +58,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–30",
     "value": 1500000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live rights reported through June 2030.",
+    "rightsType": "Live / exclusive / linear / streaming",
+    "matchCount": ""
   },
   {
     "id": 5,
@@ -61,7 +73,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 723600000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, pay-TV and online/streaming rights.",
+    "rightsType": "Live / pay-TV / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 6,
@@ -73,7 +88,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 693600000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, pay-TV and online/streaming rights.",
+    "rightsType": "Live / pay-TV / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 7,
@@ -85,7 +103,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 625200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "17 first-pick Champions League matches on Tuesday nights. Does not include the final.",
+    "rightsType": "Live / online-streaming",
+    "matchCount": "17"
   },
   {
     "id": 8,
@@ -97,7 +118,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 600000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, linear and online/streaming rights.",
+    "rightsType": "Live / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 9,
@@ -109,7 +133,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 288300000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, pay-TV and online/streaming rights.",
+    "rightsType": "Live / pay-TV / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 10,
@@ -121,7 +148,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 285000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, linear and online/streaming rights.",
+    "rightsType": "Live / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 11,
@@ -133,7 +163,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 225000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, linear and mobile rights.",
+    "rightsType": "Live / linear / mobile",
+    "matchCount": ""
   },
   {
     "id": 12,
@@ -145,7 +178,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 225000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Exclusive rights as reported.",
+    "rightsType": "Live / exclusive",
+    "matchCount": ""
   },
   {
     "id": 13,
@@ -157,7 +193,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 180000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Linear, live, online/streaming, pay-TV and exclusive rights.",
+    "rightsType": "Live / linear / online-streaming / pay-TV / exclusive",
+    "matchCount": ""
   },
   {
     "id": 14,
@@ -169,7 +208,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 165000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Exclusive live rights, including linear and online/streaming.",
+    "rightsType": "Live / exclusive / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 15,
@@ -181,7 +223,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 163200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Online/streaming, linear, live, exclusive and pay-TV rights.",
+    "rightsType": "Live / online-streaming / linear / exclusive / pay-TV",
+    "matchCount": ""
   },
   {
     "id": 16,
@@ -193,7 +238,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 140100000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Distribution rights; source lists rights as all.",
+    "rightsType": "Distribution / all",
+    "matchCount": ""
   },
   {
     "id": 17,
@@ -205,7 +253,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 139500000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, linear and exclusive rights.",
+    "rightsType": "Live / linear / exclusive",
+    "matchCount": ""
   },
   {
     "id": 18,
@@ -217,7 +268,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 135000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, linear, online/streaming and exclusive rights.",
+    "rightsType": "Live / linear / online-streaming / exclusive",
+    "matchCount": ""
   },
   {
     "id": 19,
@@ -229,7 +283,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 122400000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, exclusive, live and linear rights.",
+    "rightsType": "Live / pay-TV / exclusive / linear",
+    "matchCount": ""
   },
   {
     "id": 20,
@@ -241,7 +298,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 89400000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live and linear rights.",
+    "rightsType": "Live / pay-TV / linear",
+    "matchCount": ""
   },
   {
     "id": 21,
@@ -253,7 +313,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 79200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, exclusive, highlights, live, linear and online/streaming rights.",
+    "rightsType": "Live / pay-TV / exclusive / highlights / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 22,
@@ -265,7 +328,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 31800000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, linear and online/streaming rights.",
+    "rightsType": "Live / pay-TV / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 23,
@@ -277,7 +343,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 30000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Free-to-air, live and online/streaming rights; non-exclusive.",
+    "rightsType": "Live / free-to-air / online-streaming / non-exclusive",
+    "matchCount": ""
   },
   {
     "id": 24,
@@ -289,7 +358,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 21900000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Highlights and clips rights; no live match rights specified.",
+    "rightsType": "Highlights / delayed / linear / online-streaming / clips",
+    "matchCount": ""
   },
   {
     "id": 25,
@@ -301,7 +373,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 18000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Free-to-air, live and linear rights.",
+    "rightsType": "Free-to-air / live / linear",
+    "matchCount": ""
   },
   {
     "id": 26,
@@ -313,7 +388,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 15000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, linear, exclusive and online/streaming rights.",
+    "rightsType": "Live / pay-TV / linear / exclusive / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 27,
@@ -325,7 +403,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 51300000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live and linear rights.",
+    "rightsType": "Live / pay-TV / linear",
+    "matchCount": ""
   },
   {
     "id": 28,
@@ -337,7 +418,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 51000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Live, online/streaming and linear rights.",
+    "rightsType": "Live / online-streaming / linear",
+    "matchCount": ""
   },
   {
     "id": 29,
@@ -349,7 +433,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 49200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Free-to-air, highlights, live and linear rights.",
+    "rightsType": "Free-to-air / highlights / live / linear",
+    "matchCount": ""
   },
   {
     "id": 30,
@@ -361,7 +448,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 45000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Exclusive, online/streaming, linear, live and pay-TV rights.",
+    "rightsType": "Live / exclusive / online-streaming / linear / pay-TV",
+    "matchCount": ""
   },
   {
     "id": 31,
@@ -373,7 +463,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 42000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, linear and online/streaming rights.",
+    "rightsType": "Live / pay-TV / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 32,
@@ -385,7 +478,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 39900000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, exclusive and online/streaming rights.",
+    "rightsType": "Live / pay-TV / exclusive / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 33,
@@ -397,7 +493,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 34500000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Exclusive, pay-TV, live, linear and online/streaming rights.",
+    "rightsType": "Live / exclusive / pay-TV / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 34,
@@ -409,7 +508,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 32100000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Free-to-air, live, linear, online/streaming and pay-TV rights.",
+    "rightsType": "Live / free-to-air / linear / online-streaming / pay-TV",
+    "matchCount": ""
   },
   {
     "id": 35,
@@ -421,7 +523,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 32100000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Highlights, free-to-air, non-exclusive, live and linear rights.",
+    "rightsType": "Highlights / free-to-air / non-exclusive / live / linear",
+    "matchCount": ""
   },
   {
     "id": 36,
@@ -433,7 +538,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 75000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Exclusive, live, linear, online/streaming and highlights rights.",
+    "rightsType": "Live / exclusive / linear / online-streaming / highlights",
+    "matchCount": ""
   },
   {
     "id": 37,
@@ -445,7 +553,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 75000000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, linear and exclusive rights.",
+    "rightsType": "Live / pay-TV / linear / exclusive",
+    "matchCount": ""
   },
   {
     "id": 38,
@@ -457,7 +568,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 65400000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live and linear rights.",
+    "rightsType": "Live / pay-TV / linear",
+    "matchCount": ""
   },
   {
     "id": 39,
@@ -469,7 +583,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 58200000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, exclusive, live, linear and online/streaming rights.",
+    "rightsType": "Live / pay-TV / exclusive / linear / online-streaming",
+    "matchCount": ""
   },
   {
     "id": 40,
@@ -481,7 +598,10 @@ export const SPORTBUSINESS_DEALS: RightsDeal[] = [
     "cycle": "2024–27",
     "value": 56100000,
     "currency": "USD",
-    "source": "SportBusiness"
+    "source": "SportBusiness",
+    "packageDetails": "Pay-TV, live, linear and online/streaming rights.",
+    "rightsType": "Live / pay-TV / linear / online-streaming",
+    "matchCount": ""
   }
 ];
 
@@ -497,7 +617,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 192000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1002,
@@ -510,7 +633,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 66672,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1003,
@@ -523,7 +649,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 1500000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1004,
@@ -536,7 +665,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 1700000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1005,
@@ -549,7 +681,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 120000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1006,
@@ -562,7 +697,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 144000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1007,
@@ -575,7 +713,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 6940000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1008,
@@ -588,7 +729,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 160000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1009,
@@ -601,7 +745,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 384000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1010,
@@ -614,7 +761,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 576000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1011,
@@ -627,7 +777,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 252000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1012,
@@ -640,7 +793,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 72000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1013,
@@ -653,7 +809,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 680000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1014,
@@ -666,7 +825,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 132000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1015,
@@ -679,7 +841,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 202000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1016,
@@ -692,7 +857,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 280000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1017,
@@ -705,7 +873,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 110400,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1018,
@@ -718,7 +889,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 220500,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1019,
@@ -731,7 +905,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 800000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1020,
@@ -744,7 +921,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 84000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1021,
@@ -757,7 +937,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 720000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1022,
@@ -770,7 +953,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 140000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1023,
@@ -783,7 +969,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 2400000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1024,
@@ -796,7 +985,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 1575000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1025,
@@ -809,7 +1001,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 266000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1026,
@@ -822,7 +1017,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 106000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1027,
@@ -835,7 +1033,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 1092000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1028,
@@ -848,7 +1049,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 97500,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1029,
@@ -861,7 +1065,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 150000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1030,
@@ -874,7 +1081,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 160000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1031,
@@ -887,7 +1097,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 128000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1032,
@@ -900,7 +1113,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 40000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1033,
@@ -913,7 +1129,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 1560000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1034,
@@ -926,7 +1145,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 82000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1035,
@@ -939,7 +1161,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 180000,
     "currency": "EUR",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1036,
@@ -952,7 +1177,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 50000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   },
   {
     "id": 1037,
@@ -965,7 +1193,10 @@ export const EREDIVISIE_DEALS: RightsDeal[] = [
     "value": 750000,
     "currency": "USD",
     "source": "Eredivisie external rights tracker",
-    "imgProperty": true
+    "imgProperty": true,
+    "packageDetails": "4 live matches per round including replays, non-live highlights and clips, plus other Eredivisie match footage.",
+    "rightsType": "Live / replays / highlights / clips",
+    "matchCount": "4 live matches per round"
   }
 ];
 

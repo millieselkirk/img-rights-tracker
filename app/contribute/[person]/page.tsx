@@ -34,6 +34,9 @@ type ImportedRow = {
   market: string;
   broadcaster: string;
   package: string;
+  packageDetails: string;
+  rightsType: string;
+  matchCount: string;
   cycle: string;
   value: number;
   currency: string;
@@ -108,6 +111,9 @@ function importedRow(row: Record<string, unknown>): ImportedRow {
     market,
     broadcaster: get(/broadcaster|rights holder|rightsholder|licensee/i, "Market total"),
     package: get(/package/i, "Live rights"),
+    packageDetails: get(/package details|details/i),
+    rightsType: get(/rights type|rightstype/i),
+    matchCount: get(/match count|matches|games/i),
     cycle: get(/cycle|term|season/i, "2024–27"),
     value: importedValue(row),
     currency: get(/currency|ccy/i, "USD").toUpperCase(),
@@ -127,6 +133,7 @@ export default function Page() {
   const [market, setMarket] = useState("All markets");
   const [broadcaster, setBroadcaster] = useState("All broadcasters");
   const [selectedDeal, setSelectedDeal] = useState<RightsDeal | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [importRows, setImportRows] = useState<ImportedRow[]>([]);
   const [importName, setImportName] = useState("");
   const [importError, setImportError] = useState("");
@@ -137,12 +144,18 @@ export default function Page() {
     try {
       const savedDeals = localStorage.getItem(DEALS_KEY);
       const savedInputs = localStorage.getItem(INPUTS_KEY);
-      if (savedDeals) setDeals(JSON.parse(savedDeals));
+      if (savedDeals) {
+        const saved = JSON.parse(savedDeals) as RightsDeal[];
+        const byId = new Map(ALL_RIGHTS_DEALS.map((deal) => [deal.id, deal]));
+        saved.forEach((deal) => byId.set(deal.id, { ...byId.get(deal.id), ...deal } as RightsDeal));
+        setDeals(Array.from(byId.values()));
+      }
       if (savedInputs) setInputs(JSON.parse(savedInputs));
     } catch {}
+    finally { setIsHydrated(true); }
   }, []);
 
-  useEffect(() => { localStorage.setItem(DEALS_KEY, JSON.stringify(deals)); }, [deals]);
+  useEffect(() => { if (isHydrated) localStorage.setItem(DEALS_KEY, JSON.stringify(deals)); }, [deals, isHydrated]);
   useEffect(() => { localStorage.setItem(INPUTS_KEY, JSON.stringify(inputs)); }, [inputs]);
 
   const properties = useMemo(() => Array.from(new Set(deals.map((deal) => deal.property))).sort(), [deals]);
@@ -235,7 +248,7 @@ export default function Page() {
           {selectedDeal && (
             <section className="mt-6 rounded-2xl border border-blue-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Package breakdown</p><h3 className="mt-1 text-2xl font-bold">{selectedDeal.market}</h3><p className="mt-1 text-sm text-slate-500">{selectedDeal.property} · {selectedDeal.broadcaster}</p></div><button onClick={() => setSelectedDeal(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600">Close</button></div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Package</p><p className="mt-1 font-bold">{selectedDeal.package}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights cycle</p><p className="mt-1 font-bold">{selectedDeal.cycle}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Reported value</p><p className="mt-1 font-bold">{formatCurrency(selectedDeal.value, selectedDeal.currency)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Territory</p><p className="mt-1 font-bold">{selectedDeal.market}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Broadcaster</p><p className="mt-1 font-bold">{selectedDeal.broadcaster}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Source</p><p className="mt-1 font-bold">{selectedDeal.source}</p></div></div>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><div className="rounded-xl bg-blue-50 p-4 sm:col-span-2 lg:col-span-3"><p className="text-xs uppercase text-blue-600">Package details</p><p className="mt-1 font-semibold">{selectedDeal.packageDetails || "No additional package detail recorded."}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Package</p><p className="mt-1 font-bold">{selectedDeal.package}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Matches / games</p><p className="mt-1 font-bold">{selectedDeal.matchCount || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights type</p><p className="mt-1 font-bold">{selectedDeal.rightsType || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights cycle</p><p className="mt-1 font-bold">{selectedDeal.cycle}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Reported value</p><p className="mt-1 font-bold">{formatCurrency(selectedDeal.value, selectedDeal.currency)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Territory</p><p className="mt-1 font-bold">{selectedDeal.market}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Broadcaster</p><p className="mt-1 font-bold">{selectedDeal.broadcaster}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Source</p><p className="mt-1 font-bold">{selectedDeal.source}</p></div></div>
             </section>
           )}
         </section>}

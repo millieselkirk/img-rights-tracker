@@ -199,8 +199,9 @@ export default function OverviewPage() {
               </button>
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-xl bg-blue-50 p-4 sm:col-span-2 lg:col-span-3"><p className="text-xs uppercase text-blue-600">Package details</p><p className="mt-1 font-semibold">{selectedDeal.packageDetails || "No additional package detail recorded."}</p></div>
               <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Package</p><p className="mt-1 font-bold">{selectedDeal.package}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights cycle</p><p className="mt-1 font-bold">{selectedDeal.cycle}</p></div>
+              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Matches / games</p><p className="mt-1 font-bold">{selectedDeal.matchCount || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights type</p><p className="mt-1 font-bold">{selectedDeal.rightsType || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights cycle</p><p className="mt-1 font-bold">{selectedDeal.cycle}</p></div>
               <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Reported value</p><p className="mt-1 font-bold">{formatCurrency(selectedDeal.value, selectedDeal.currency)}</p></div>
               <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Territory</p><p className="mt-1 font-bold">{selectedDeal.market}</p></div>
               <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Broadcaster</p><p className="mt-1 font-bold">{selectedDeal.broadcaster}</p></div>
