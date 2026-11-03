@@ -1,168 +1,31 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  ALL_RIGHTS_DEALS,
-  RightsDeal,
-} from "../data/rights-data";
+import { ALL_RIGHTS_DEALS, RightsDeal } from "../data/rights-data";
 
 function formatCurrency(value: number, currency: string) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value);
+  try { return new Intl.NumberFormat("en-GB", { style: "currency", currency, maximumFractionDigits: 0 }).format(value); }
+  catch { return `${currency} ${value.toLocaleString()}`; }
 }
 
-function PropertyCard({
-  property,
-  deals,
-  imgProperty,
-  onClick,
-}: {
-  property: string;
-  deals: RightsDeal[];
-  imgProperty?: boolean;
-  onClick: () => void;
-}) {
+function PropertyCard({ property, deals, onClick }: { property: string; deals: RightsDeal[]; onClick: () => void }) {
   const markets = new Set(deals.map((deal) => deal.market));
-
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="min-h-6">
-            {imgProperty && (
-              <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                IMG property
-              </span>
-            )}
-          </div>
-          <h2 className={`${imgProperty ? "mt-2" : "mt-0"} text-xl font-bold`}>
-            {property}
-          </h2>
-        </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-          {deals.length} records
-        </span>
-      </div>
-      <p className="mt-4 text-sm text-slate-500">
-        {markets.size} markets · 2025/26–2029/30
-      </p>
-      <p className="mt-5 text-sm font-semibold text-[#e31837]">
-        View rights overview →
-      </p>
-    </button>
-  );
+  return <button onClick={onClick} className="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><div className="min-h-6">{property === "Eredivisie" && <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">IMG property</span>}</div><h2 className={`${property === "Eredivisie" ? "mt-2" : "mt-0"} text-xl font-bold`}>{property}</h2><p className="mt-4 text-sm text-slate-500">{markets.size} markets · {deals.length} records</p><p className="mt-5 text-sm font-semibold text-[#e31837]">View rights overview →</p></button>;
 }
 
 export default function OverviewPage() {
-  const properties = useMemo(
-    () => Array.from(new Set(ALL_RIGHTS_DEALS.map((deal) => deal.property))),
-    []
-  );
-
+  const properties = useMemo(() => Array.from(new Set(ALL_RIGHTS_DEALS.map((deal) => deal.property))), []);
   const [selectedProperty, setSelectedProperty] = useState(properties[0]);
-  const [marketFilter, setMarketFilter] = useState("All markets");
+  const [cycle, setCycle] = useState("All cycles");
+  const [market, setMarket] = useState("All markets");
   const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
-
-  const selectedDeals = ALL_RIGHTS_DEALS.filter(
-    (deal) =>
-      deal.property === selectedProperty &&
-      (marketFilter === "All markets" || deal.market === marketFilter)
-  );
-
-  const territoryRows = Array.from(new Set(selectedDeals.map((deal) => deal.market))).map((territory) => {
-    const rows = selectedDeals.filter((deal) => deal.market === territory);
-    const currency = rows[0]?.currency || "USD";
-    const total = rows.filter((deal) => deal.currency === currency).reduce((sum, deal) => sum + deal.value, 0);
-    return { territory, rows, currency, total };
-  });
+  const propertyDeals = ALL_RIGHTS_DEALS.filter((deal) => deal.property === selectedProperty);
+  const cycles = Array.from(new Set(propertyDeals.map((deal) => deal.cycle))).sort();
+  const markets = Array.from(new Set(propertyDeals.map((deal) => deal.market))).sort();
+  const selectedDeals = propertyDeals.filter((deal) => (cycle === "All cycles" || deal.cycle === cycle) && (market === "All markets" || deal.market === market));
+  const territoryRows = Array.from(new Set(selectedDeals.map((deal) => deal.market))).map((territory) => { const rows = selectedDeals.filter((deal) => deal.market === territory); const currency = rows[0]?.currency || "USD"; const total = rows.filter((deal) => deal.currency === currency).reduce((sum, deal) => sum + deal.value, 0); return { territory, rows, currency, total }; });
   const selectedTerritoryDeals = selectedMarket ? selectedDeals.filter((deal) => deal.market === selectedMarket) : [];
+  function chooseProperty(value: string) { setSelectedProperty(value); setCycle("All cycles"); setMarket("All markets"); setSelectedMarket(null); }
 
-  const markets = Array.from(
-    new Set(
-      ALL_RIGHTS_DEALS.filter((deal) => deal.property === selectedProperty).map(
-        (deal) => deal.market
-      )
-    )
-  );
-
-  return (
-    <main className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="bg-[#111827] text-white">
-        <div className="mx-auto max-w-7xl px-6 py-6">
-          <img src="/img-logo-white.png" alt="IMG" className="h-9 w-auto" />
-          <p className="mt-6 text-sm uppercase tracking-wider text-white/60">
-            Football Rights Tracker
-          </p>
-          <h1 className="mt-1 text-3xl font-bold">Rights overview</h1>
-          <p className="mt-2 text-white/70">
-            Read-only view of current rights records and IMG properties.
-          </p>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 grid gap-5 md:grid-cols-2">
-          {properties.map((property) => {
-            const deals = ALL_RIGHTS_DEALS.filter(
-              (deal) => deal.property === property
-            );
-
-            return (
-              <PropertyCard
-                key={property}
-                property={property}
-                deals={deals}
-                imgProperty={property === "Eredivisie"}
-                onClick={() => {
-                  setSelectedProperty(property);
-                  setMarketFilter("All markets");
-                  setSelectedMarket(null);
-                }}
-              />
-            );
-          })}
-        </div>
-
-        <section className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="min-h-6">
-                {selectedProperty === "Eredivisie" && (
-                  <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                    IMG property
-                  </span>
-                )}
-              </div>
-              <h2 className="mt-1 text-2xl font-bold">{selectedProperty}</h2>
-            </div>
-
-            <select
-              value={marketFilter}
-              onChange={(event) => setMarketFilter(event.target.value)}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
-            >
-              <option>All markets</option>
-              {markets.map((market) => (
-                <option key={market}>{market}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[800px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">Territory</th><th className="px-4 py-3">Total rights value</th><th className="px-4 py-3">Packages</th><th className="px-4 py-3">Action</th></tr></thead><tbody className="divide-y divide-slate-100">{territoryRows.map((row) => <tr key={row.territory} className={`transition ${selectedMarket === row.territory ? "bg-blue-50" : "hover:bg-slate-50"}`}><td className="px-4 py-4 font-semibold">{row.territory}</td><td className="px-4 py-4 font-semibold">{formatCurrency(row.total, row.currency)}</td><td className="px-4 py-4">{row.rows.length}</td><td className="px-4 py-4"><button onClick={() => setSelectedMarket(row.territory)} className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">View package details →</button></td></tr>)}</tbody></table></div>
-        </section>
-
-        {selectedMarket && selectedTerritoryDeals.length > 0 && <section className="mt-6 rounded-2xl border border-blue-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Package breakdown</p><h3 className="mt-1 text-2xl font-bold">{selectedMarket}</h3><p className="mt-1 text-sm text-slate-500">{selectedProperty} · {selectedTerritoryDeals.length} package record{selectedTerritoryDeals.length === 1 ? "" : "s"}</p></div><button onClick={() => setSelectedMarket(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600">Close</button></div><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{["Broadcaster", "Package", "Cycle", "Term", "Value", "Source"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{selectedTerritoryDeals.map((deal) => <tr key={deal.id}><td className="px-4 py-4 font-semibold">{deal.broadcaster}</td><td className="px-4 py-4">{deal.package}</td><td className="px-4 py-4">{deal.cycle}</td><td className="px-4 py-4">{deal.term || "Not specified"}</td><td className="px-4 py-4 font-semibold">{formatCurrency(deal.value, deal.currency)}</td><td className="px-4 py-4 text-slate-500">{deal.source}</td></tr>)}</tbody></table></div></section>}
-
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
-          Need to submit your commercial input? Use your personal link supplied by IMG.
-        </div>
-      </div>
-    </main>
-  );
+  return <main className="min-h-screen bg-slate-100 text-slate-900"><header className="bg-[#111827] text-white"><div className="mx-auto max-w-7xl px-6 py-6"><img src="/img-logo-white.png" alt="IMG" className="h-9 w-auto"/><p className="mt-6 text-sm uppercase tracking-wider text-white/60">Football Rights Tracker</p><h1 className="mt-1 text-3xl font-bold">Rights overview</h1><p className="mt-2 text-white/70">Read-only view of current rights records and IMG properties.</p></div></header><div className="mx-auto max-w-7xl px-6 py-8"><div className="mb-8 grid gap-5 md:grid-cols-2">{properties.map((property) => <PropertyCard key={property} property={property} deals={ALL_RIGHTS_DEALS.filter((deal) => deal.property === property)} onClick={() => chooseProperty(property)}/>)}</div><section className="rounded-2xl bg-white p-6 shadow-sm"><div className="flex flex-wrap items-end justify-between gap-4"><div><div className="min-h-6">{selectedProperty === "Eredivisie" && <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">IMG property</span>}</div><h2 className="mt-1 text-2xl font-bold">{selectedProperty}</h2></div><div className="flex flex-wrap gap-3"><select value={cycle} onChange={(e) => { setCycle(e.target.value); setSelectedMarket(null); }} className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"><option>All cycles</option>{cycles.map((item) => <option key={item}>{item}</option>)}</select><select value={market} onChange={(e) => { setMarket(e.target.value); setSelectedMarket(null); }} className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"><option>All markets</option>{markets.map((item) => <option key={item}>{item}</option>)}</select></div></div>{selectedMarket ? <div className="mt-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Package breakdown</p><h3 className="mt-1 text-2xl font-bold">{selectedMarket}</h3><p className="mt-1 text-sm text-slate-500">{selectedProperty}{cycle !== "All cycles" ? ` · ${cycle}` : ""}</p></div><button onClick={() => setSelectedMarket(null)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">← Back to territory overview</button></div><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{["Broadcaster", "Package", "Package details", "Cycle", "Term", "Value", "Source"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{selectedTerritoryDeals.map((deal) => <tr key={deal.id}><td className="px-4 py-4 font-semibold">{deal.broadcaster}</td><td className="px-4 py-4">{deal.package}</td><td className="px-4 py-4">{deal.packageDetails || "Not specified"}</td><td className="px-4 py-4">{deal.cycle}</td><td className="px-4 py-4">{deal.term || "Not specified"}</td><td className="px-4 py-4 font-semibold">{formatCurrency(deal.value, deal.currency)}</td><td className="px-4 py-4 text-slate-500">{deal.source}</td></tr>)}</tbody></table></div></div> : <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[800px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{["Territory", "Total rights value", "Packages", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{territoryRows.map((row) => <tr key={row.territory}><td className="px-4 py-4 font-semibold">{row.territory}</td><td className="px-4 py-4 font-semibold">{formatCurrency(row.total, row.currency)}</td><td className="px-4 py-4">{row.rows.length}</td><td className="px-4 py-4"><button onClick={() => setSelectedMarket(row.territory)} className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">View package details →</button></td></tr>)}</tbody></table></div>}</section><div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">Need to submit your commercial input? Use your personal link supplied by IMG.</div></div></main>;
 }
