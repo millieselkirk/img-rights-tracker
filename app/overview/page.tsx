@@ -34,10 +34,16 @@ function PropertyCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#e31837]">
-            {imgProperty ? "IMG property" : "Rights property"}
-          </p>
-          <h2 className="mt-2 text-xl font-bold">{property}</h2>
+          <div className="min-h-6">
+            {imgProperty && (
+              <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                IMG property
+              </span>
+            )}
+          </div>
+          <h2 className={`${imgProperty ? "mt-2" : "mt-0"} text-xl font-bold`}>
+            {property}
+          </h2>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
           {deals.length} records
@@ -116,11 +122,13 @@ export default function OverviewPage() {
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#e31837]">
-                {selectedProperty === "Eredivisie"
-                  ? "IMG property"
-                  : "Rights overview"}
-              </p>
+              <div className="min-h-6">
+                {selectedProperty === "Eredivisie" && (
+                  <span className="inline-flex rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                    IMG property
+                  </span>
+                )}
+              </div>
               <h2 className="mt-1 text-2xl font-bold">{selectedProperty}</h2>
             </div>
 
