@@ -1,6 +1,6 @@
 export type Region = "EMEA" | "APAC" | "AMERICAS";
 
-export type RightsDeal = { id:number; property:string; market:string; region:Region; broadcaster:string; package:string; packageDetails?:string; rightsType?:string; matchCount?:string; cycle:string; term?:string; value:number; currency:string; source:string; imgProperty?:boolean; };
+export type RightsDeal = { id:number; property:string; market:string; region:Region; broadcaster:string; package:string; packageDetails?:string; rightsType?:string; matchCount?:string; cycle:string; term?:string; value:number; currency:string; source:string; imgProperty?:boolean; commercialStatus?: "Not yet provided" | "Commercial view" | "Verified by commercial"; commercialValue?: number; commercialCommentary?: string; };
 
 export const SPORTBUSINESS_DEALS: RightsDeal[] = [
   {
