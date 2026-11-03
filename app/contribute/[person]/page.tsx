@@ -37,6 +37,16 @@ type CommercialInput = {
   reminderCount: number;
 };
 
+type Deal = {
+  property: string;
+  market: string;
+  broadcaster: string;
+  package: string;
+  cycle: string;
+  value: number;
+  currency: string;
+};
+
 type ContributorProfile = {
   name: string;
   email: string;
@@ -83,6 +93,75 @@ const PROPERTIES = [
   "LaLiga",
 ];
 
+const SPORTBUSINESS_DEALS: Deal[] = [
+  {
+    property: "UEFA Champions League",
+    market: "United Kingdom",
+    broadcaster: "TNT Sports UK",
+    package: "Live rights",
+    cycle: "2024–27",
+    value: 305000000,
+    currency: "GBP",
+  },
+  {
+    property: "UEFA Champions League",
+    market: "United Kingdom",
+    broadcaster: "Amazon",
+    package: "Selected live matches",
+    cycle: "2024–27",
+    value: 100000000,
+    currency: "GBP",
+  },
+  {
+    property: "UEFA Champions League",
+    market: "United Kingdom",
+    broadcaster: "BBC",
+    package: "Highlights",
+    cycle: "2024–27",
+    value: 6000000,
+    currency: "GBP",
+  },
+  {
+    property: "UEFA Champions League",
+    market: "Germany",
+    broadcaster: "DAZN",
+    package: "Live rights",
+    cycle: "2024–27",
+    value: 150000000,
+    currency: "EUR",
+  },
+  {
+    property: "Premier League",
+    market: "United Kingdom",
+    broadcaster: "Market total",
+    package: "All rights",
+    cycle: "2025–29",
+    value: 6700000000,
+    currency: "GBP",
+  },
+  {
+    property: "LaLiga",
+    market: "United States",
+    broadcaster: "Market total",
+    package: "All rights",
+    cycle: "2024–27",
+    value: 175000000,
+    currency: "USD",
+  },
+];
+
+function formatCurrency(value: number, currency: string) {
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${currency} ${value.toLocaleString()}`;
+  }
+}
+
 function ContributorPageContent() {
   const params = useParams<{ person: string }>();
   const profile = PROFILES[String(params.person)];
@@ -122,6 +201,14 @@ function ContributorPageContent() {
       // Ignore invalid localStorage values.
     }
   }, [profile]);
+
+  const sportBusinessRecords = useMemo(() => {
+    return SPORTBUSINESS_DEALS.filter(
+      (deal) =>
+        deal.property === property &&
+        deal.market === market
+    );
+  }, [property, market]);
 
   const profileInputs = useMemo(() => {
     if (!profile) return [];
@@ -187,6 +274,7 @@ function ContributorPageContent() {
           );
 
     setInputs(nextInputs);
+
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(nextInputs)
@@ -251,8 +339,8 @@ function ContributorPageContent() {
             </h2>
 
             <p className="mt-2 text-sm text-slate-500">
-              Complete the fields below. Your information will be
-              saved against your contributor profile.
+              Review the SportBusiness data before submitting your
+              commercial input.
             </p>
 
             <div className="mt-6 space-y-5">
@@ -285,6 +373,53 @@ function ContributorPageContent() {
                   ))}
                 </select>
               </label>
+
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
+                  SportBusiness reference data
+                </p>
+
+                <p className="mt-2 text-sm text-blue-900">
+                  Review the reference data below before entering
+                  your commercial input.
+                </p>
+
+                {sportBusinessRecords.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    {sportBusinessRecords.map((deal) => (
+                      <div
+                        key={`${deal.broadcaster}-${deal.package}`}
+                        className="rounded-lg border border-blue-100 bg-white p-3"
+                      >
+                        <div className="flex justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-slate-900">
+                              {deal.broadcaster}
+                            </p>
+
+                            <p className="text-xs text-slate-500">
+                              {deal.package} · {deal.cycle}
+                            </p>
+                          </div>
+
+                          <p className="text-right text-sm font-bold text-slate-900">
+                            {formatCurrency(
+                              deal.value,
+                              deal.currency
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-lg bg-white p-3 text-sm text-slate-600">
+                    No SportBusiness record is currently available
+                    for this market. Please provide the commercial
+                    input if you have relevant information.
+                  </p>
+                )}
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block text-sm font-semibold">
@@ -392,7 +527,10 @@ function ContributorPageContent() {
                     )
                   }
                 />
-                SportBusiness data is accurate
+
+                {sportBusinessRecords.length > 0
+                  ? "I have reviewed the SportBusiness data above"
+                  : "I have reviewed the available information"}
               </label>
 
               <button
