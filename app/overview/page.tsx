@@ -67,13 +67,21 @@ export default function OverviewPage() {
 
   const [selectedProperty, setSelectedProperty] = useState(properties[0]);
   const [marketFilter, setMarketFilter] = useState("All markets");
-  const [selectedDeal, setSelectedDeal] = useState<RightsDeal | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
 
   const selectedDeals = ALL_RIGHTS_DEALS.filter(
     (deal) =>
       deal.property === selectedProperty &&
       (marketFilter === "All markets" || deal.market === marketFilter)
   );
+
+  const territoryRows = Array.from(new Set(selectedDeals.map((deal) => deal.market))).map((territory) => {
+    const rows = selectedDeals.filter((deal) => deal.market === territory);
+    const currency = rows[0]?.currency || "USD";
+    const total = rows.filter((deal) => deal.currency === currency).reduce((sum, deal) => sum + deal.value, 0);
+    return { territory, rows, currency, total };
+  });
+  const selectedTerritoryDeals = selectedMarket ? selectedDeals.filter((deal) => deal.market === selectedMarket) : [];
 
   const markets = Array.from(
     new Set(
@@ -114,6 +122,7 @@ export default function OverviewPage() {
                 onClick={() => {
                   setSelectedProperty(property);
                   setMarketFilter("All markets");
+                  setSelectedMarket(null);
                 }}
               />
             );
@@ -145,70 +154,10 @@ export default function OverviewPage() {
             </select>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Market</th>
-                  <th className="px-4 py-3">Broadcaster</th>
-                  <th className="px-4 py-3">Package</th>
-                  <th className="px-4 py-3">Cycle</th>
-                  <th className="px-4 py-3">Value</th>
-                  <th className="px-4 py-3">Source</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {selectedDeals.map((deal) => (
-                  <tr
-                    key={deal.id}
-                    onClick={() => setSelectedDeal(deal)}
-                    className="cursor-pointer transition hover:bg-blue-50"
-                  >
-                    <td className="px-4 py-4 font-semibold">{deal.market}</td>
-                    <td className="px-4 py-4">{deal.broadcaster}</td>
-                    <td className="px-4 py-4">{deal.package}</td>
-                    <td className="px-4 py-4">{deal.cycle}</td>
-                    <td className="px-4 py-4 font-semibold">
-                      {formatCurrency(deal.value, deal.currency)}
-                    </td>
-                    <td className="px-4 py-4 text-slate-500">{deal.source}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[800px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">Territory</th><th className="px-4 py-3">Total rights value</th><th className="px-4 py-3">Packages</th><th className="px-4 py-3">Action</th></tr></thead><tbody className="divide-y divide-slate-100">{territoryRows.map((row) => <tr key={row.territory} className={`transition ${selectedMarket === row.territory ? "bg-blue-50" : "hover:bg-slate-50"}`}><td className="px-4 py-4 font-semibold">{row.territory}</td><td className="px-4 py-4 font-semibold">{formatCurrency(row.total, row.currency)}</td><td className="px-4 py-4">{row.rows.length}</td><td className="px-4 py-4"><button onClick={() => setSelectedMarket(row.territory)} className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">View package details →</button></td></tr>)}</tbody></table></div>
         </section>
 
-        {selectedDeal && (
-          <section className="mt-6 rounded-2xl border border-blue-200 bg-white p-6 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                  Package breakdown
-                </p>
-                <h3 className="mt-1 text-2xl font-bold">{selectedDeal.market}</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {selectedDeal.property} · {selectedDeal.broadcaster}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedDeal(null)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600"
-              >
-                Close
-              </button>
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-xl bg-blue-50 p-4 sm:col-span-2 lg:col-span-3"><p className="text-xs uppercase text-blue-600">Package details</p><p className="mt-1 font-semibold">{selectedDeal.packageDetails || "No additional package detail recorded."}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Package</p><p className="mt-1 font-bold">{selectedDeal.package}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Matches / games</p><p className="mt-1 font-bold">{selectedDeal.matchCount || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights type</p><p className="mt-1 font-bold">{selectedDeal.rightsType || "Not specified"}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Rights cycle</p><p className="mt-1 font-bold">{selectedDeal.cycle}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Reported value</p><p className="mt-1 font-bold">{formatCurrency(selectedDeal.value, selectedDeal.currency)}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Territory</p><p className="mt-1 font-bold">{selectedDeal.market}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Broadcaster</p><p className="mt-1 font-bold">{selectedDeal.broadcaster}</p></div>
-              <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs uppercase text-slate-500">Source</p><p className="mt-1 font-bold">{selectedDeal.source}</p></div>
-            </div>
-          </section>
-        )}
+        {selectedMarket && selectedTerritoryDeals.length > 0 && <section className="mt-6 rounded-2xl border border-blue-200 bg-white p-6 shadow-sm"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wider text-blue-600">Package breakdown</p><h3 className="mt-1 text-2xl font-bold">{selectedMarket}</h3><p className="mt-1 text-sm text-slate-500">{selectedProperty} · {selectedTerritoryDeals.length} package record{selectedTerritoryDeals.length === 1 ? "" : "s"}</p></div><button onClick={() => setSelectedMarket(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600">Close</button></div><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{["Broadcaster", "Package", "Cycle", "Term", "Value", "Source"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{selectedTerritoryDeals.map((deal) => <tr key={deal.id}><td className="px-4 py-4 font-semibold">{deal.broadcaster}</td><td className="px-4 py-4">{deal.package}</td><td className="px-4 py-4">{deal.cycle}</td><td className="px-4 py-4">{deal.term || "Not specified"}</td><td className="px-4 py-4 font-semibold">{formatCurrency(deal.value, deal.currency)}</td><td className="px-4 py-4 text-slate-500">{deal.source}</td></tr>)}</tbody></table></div></section>}
 
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
           Need to submit your commercial input? Use your personal link supplied by IMG.
