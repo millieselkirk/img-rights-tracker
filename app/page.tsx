@@ -8,10 +8,9 @@ type Tab =
   | "SportBusiness Import"
   | "Commercial Inputs";
 
-type UserMode = "admin" | "contributor";
 type Region = "EMEA" | "APAC" | "AMERICAS";
 type Confidence = "High" | "Medium" | "Low";
-type CommercialStatus = "Not started" | "In progress" | "Complete";
+type Status= "Not started" | "In progress" | "Complete";
 
 type Deal = {
   id: number;
@@ -43,7 +42,7 @@ type CommercialInput = {
   ownerEmail: string;
   contributors: string[];
   due: string;
-  status: CommercialStatus;
+  status: Status;
   lastUpdated?: string;
   completedAt?: string;
   lastReminderSent?: string;
@@ -167,10 +166,10 @@ const initialCommercialInputs: CommercialInput[] = [
     currency: "GBP",
     confidence: "High",
     packageDetails: "TNT Sports, Amazon and BBC packages",
-    commentary: "Existing SportBusiness values reviewed and matched.",
+    commentary: "",
     matchesSportBusiness: true,
-    owner: "Football Commercial",
-    ownerEmail: "",
+    owner: "Alberto Horta",
+    ownerEmail: "alberto.horta@img.com",
     contributors: [],
     due: "2026-11-10",
     status: "In progress",
@@ -189,10 +188,90 @@ const initialCommercialInputs: CommercialInput[] = [
     packageDetails: "DAZN live rights",
     commentary: "",
     matchesSportBusiness: true,
-    owner: "Football Commercial",
-    ownerEmail: "",
+    owner: "Alberto Horta",
+    ownerEmail: "alberto.horta@img.com",
     contributors: [],
     due: "2026-11-10",
+    status: "In progress",
+    reminderCount: 0,
+  },
+  {
+    id: 103,
+    region: "EMEA",
+    property: "UEFA Champions League",
+    market: "Spain",
+    cycle: "2024–27",
+    aav: "",
+    cycleTotal: "",
+    currency: "EUR",
+    confidence: "Medium",
+    packageDetails: "",
+    commentary: "Demo contributor record for Jordi Hernandez.",
+    matchesSportBusiness: false,
+    owner: "Jordi Hernandez",
+    ownerEmail: "jordi.hernandez@img.com",
+    contributors: [],
+    due: "2026-11-17",
+    status: "Not started",
+    reminderCount: 0,
+  },
+  {
+    id: 104,
+    region: "EMEA",
+    property: "UEFA Champions League",
+    market: "Portugal",
+    cycle: "2024–27",
+    aav: "",
+    cycleTotal: "",
+    currency: "EUR",
+    confidence: "Medium",
+    packageDetails: "",
+    commentary: "Demo contributor record for Jordi Hernandez.",
+    matchesSportBusiness: false,
+    owner: "Jordi Hernandez",
+    ownerEmail: "jordi.hernandez@img.com",
+    contributors: [],
+    due: "2026-11-17",
+    status: "Not started",
+    reminderCount: 0,
+  },
+  {
+    id: 105,
+    region: "EMEA",
+    property: "Premier League",
+    market: "United Kingdom",
+    cycle: "2025–29",
+    aav: "1675000000",
+    cycleTotal: "6700000000",
+    currency: "GBP",
+    confidence: "High",
+    packageDetails: "Domestic live rights",
+    commentary: "",
+    matchesSportBusiness: true,
+    owner: "Alberto Horta",
+    ownerEmail: "alberto.horta@img.com",
+    contributors: [],
+    due: "2026-11-17",
+    status: "In progress",
+    reminderCount: 0,
+  },
+  {
+    id: 106,
+    region: "AMERICAS",
+    property: "LaLiga",
+    market: "United States",
+    cycle: "2024–27",
+    aav: "58333333",
+    cycleTotal: "175000000",
+    currency: "USD",
+    confidence: "Medium",
+    packageDetails: "US market total",
+    commentary: "",
+    matchesSportBusiness: true,
+    owner: "Hillary Mandel",
+    ownerEmail: "hillary.mandel@img.com",
+    contributors: [],
+    due: "2026-11-17",
     status: "In progress",
     reminderCount: 0,
   },
@@ -217,12 +296,12 @@ function getRegionForMarket(market: string): Region {
 
   if (
     [
-      "argentina",
-      "brazil",
-      "canada",
-      "mexico",
       "united states",
       "usa",
+      "canada",
+      "mexico",
+      "brazil",
+      "argentina",
     ].some((item) => value.includes(item))
   ) {
     return "AMERICAS";
@@ -232,27 +311,51 @@ function getRegionForMarket(market: string): Region {
 }
 
 function getDefaultOwner(market: string) {
-  const region = getRegionForMarket(market);
+  const value = market.toLowerCase();
 
-  if (region === "APAC") {
+  if (
+    value.includes("spain") ||
+    value.includes("portugal")
+  ) {
     return {
-      owner: "APAC Commercial",
-      ownerEmail: "",
+      owner: "Jordi Hernandez",
+      ownerEmail: "jordi.hernandez@img.com",
       contributors: [],
     };
   }
 
-  if (region === "AMERICAS") {
+  if (
+    value.includes("united states") ||
+    value.includes("usa") ||
+    value.includes("canada") ||
+    value.includes("mexico")
+  ) {
     return {
-      owner: "Americas Commercial",
-      ownerEmail: "",
+      owner: "Hillary Mandel",
+      ownerEmail: "hillary.mandel@img.com",
+      contributors: [],
+    };
+  }
+
+  if (
+    value.includes("australia") ||
+    value.includes("china") ||
+    value.includes("india") ||
+    value.includes("indonesia") ||
+    value.includes("japan") ||
+    value.includes("singapore") ||
+    value.includes("south korea")
+  ) {
+    return {
+      owner: "Dale Levin",
+      ownerEmail: "dale.levin@img.com",
       contributors: [],
     };
   }
 
   return {
-    owner: "Football Commercial",
-    ownerEmail: "",
+    owner: "Alberto Horta",
+    ownerEmail: "alberto.horta@img.com",
     contributors: [],
   };
 }
@@ -273,7 +376,7 @@ function createCommercialDraft(property: string): CommercialDraft {
     matchesSportBusiness: false,
     owner: owner.owner,
     ownerEmail: owner.ownerEmail,
-    contributors: owner.contributors,
+    contributors: [],
     due: "2026-11-10",
   };
 }
@@ -283,13 +386,20 @@ function normaliseCommercialInput(
   index: number
 ): CommercialInput {
   const market = String(raw.market ?? "");
-  const owner = getDefaultOwner(market);
+  const fallbackOwner = getDefaultOwner(market);
 
   const hasData = Boolean(
     String(raw.aav ?? "").trim() ||
       String(raw.cycleTotal ?? "").trim() ||
       raw.matchesSportBusiness
   );
+
+  const oldOwner =
+    !raw.owner ||
+    raw.owner === "Football Commercial" ||
+    raw.owner === "EMEA Commercial" ||
+    raw.owner === "APAC Commercial" ||
+    raw.owner === "Americas Commercial";
 
   return {
     id: Number(raw.id) || Date.now() + index,
@@ -314,8 +424,12 @@ function normaliseCommercialInput(
     packageDetails: String(raw.packageDetails ?? ""),
     commentary: String(raw.commentary ?? ""),
     matchesSportBusiness: Boolean(raw.matchesSportBusiness),
-    owner: String(raw.owner ?? owner.owner),
-    ownerEmail: String(raw.ownerEmail ?? owner.ownerEmail),
+    owner: oldOwner
+      ? fallbackOwner.owner
+      : String(raw.owner),
+    ownerEmail: oldOwner
+      ? fallbackOwner.ownerEmail
+      : String(raw.ownerEmail ?? ""),
     contributors: Array.isArray(raw.contributors)
       ? raw.contributors.map(String)
       : [],
@@ -356,14 +470,6 @@ function formatCurrency(value: number, currency: string) {
   }
 }
 
-function normaliseHeader(value: unknown) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ");
-}
-
 function findColumn(
   row: Record<string, unknown>,
   names: string[]
@@ -372,7 +478,8 @@ function findColumn(
 
   for (const name of names) {
     const exact = entries.find(
-      ([key]) => normaliseHeader(key) === normaliseHeader(name)
+      ([key]) =>
+        key.toLowerCase().trim() === name.toLowerCase()
     );
 
     if (exact) return exact[1];
@@ -380,7 +487,7 @@ function findColumn(
 
   for (const name of names) {
     const partial = entries.find(([key]) =>
-      normaliseHeader(key).includes(normaliseHeader(name))
+      key.toLowerCase().includes(name.toLowerCase())
     );
 
     if (partial) return partial[1];
@@ -447,7 +554,7 @@ function mapImportedRow(
   };
 }
 
-function StatusBadge({ status }: { status: CommercialStatus }) {
+function StatusBadge({ status }: { status: Status }) {
   const style =
     status === "Complete"
       ? "bg-green-100 text-green-800"
@@ -465,9 +572,6 @@ function StatusBadge({ status }: { status: CommercialStatus }) {
 export default function Page() {
   const [activeTab, setActiveTab] =
     useState<Tab>("Rights Overview");
-
-  const [userMode, setUserMode] =
-    useState<UserMode>("admin");
 
   const [deals, setDeals] = useState<Deal[]>(initialDeals);
   const [commercialInputs, setCommercialInputs] =
@@ -517,6 +621,7 @@ export default function Page() {
 
       if (savedInputs) {
         const parsed = JSON.parse(savedInputs);
+
         if (Array.isArray(parsed)) {
           setCommercialInputs(
             parsed.map((item, index) =>
@@ -532,6 +637,7 @@ export default function Page() {
       }
 
       if (savedFile) setImportFileName(savedFile);
+
       if (savedApproved) {
         setApprovedCount(Number(savedApproved) || 0);
       }
@@ -580,37 +686,21 @@ export default function Page() {
     [deals, commercialInputs]
   );
 
-  const selectedDeals = useMemo(
-    () =>
-      deals.filter((deal) => {
-        const propertyMatch =
-          deal.property === selectedProperty;
-
-        const marketMatch =
-          marketFilter === "All markets" ||
-          deal.market === marketFilter;
-
-        const broadcasterMatch =
-          broadcasterFilter === "All broadcasters" ||
-          deal.broadcaster === broadcasterFilter;
-
-        return (
-          propertyMatch &&
-          marketMatch &&
-          broadcasterMatch
-        );
-      }),
-    [
-      deals,
-      selectedProperty,
-      marketFilter,
-      broadcasterFilter,
-    ]
-  );
-
   const propertyDeals = deals.filter(
     (deal) => deal.property === selectedProperty
   );
+
+  const selectedDeals = propertyDeals.filter((deal) => {
+    const marketMatches =
+      marketFilter === "All markets" ||
+      deal.market === marketFilter;
+
+    const broadcasterMatches =
+      broadcasterFilter === "All broadcasters" ||
+      deal.broadcaster === broadcasterFilter;
+
+    return marketMatches && broadcasterMatches;
+  });
 
   const markets = Array.from(
     new Set(propertyDeals.map((deal) => deal.market))
@@ -634,7 +724,7 @@ export default function Page() {
     }));
   }
 
-  function changeCommercialRegion(region: Region) {
+  function changeRegion(region: Region) {
     setCommercialRegion(region);
 
     const existing = commercialInputs.find(
@@ -650,7 +740,7 @@ export default function Page() {
     setDraft(createCommercialDraft(property));
   }
 
-  function changeCommercialProperty(property: string) {
+  function changeProperty(property: string) {
     setCommercialProperty(property);
     setDraft(createCommercialDraft(property));
   }
@@ -675,7 +765,7 @@ export default function Page() {
       packageDetails: draft.packageDetails,
       commentary: draft.commentary,
       matchesSportBusiness: draft.matchesSportBusiness,
-      owner: draft.owner.trim() || "Football Commercial",
+      owner: draft.owner.trim() || "Alberto Horta",
       ownerEmail: draft.ownerEmail.trim(),
       contributors: draft.contributors,
       due: draft.due,
@@ -858,9 +948,9 @@ export default function Page() {
             matchesSportBusiness: false,
             owner: owner.owner,
             ownerEmail: owner.ownerEmail,
-            contributors: owner.contributors,
+            contributors: [],
             due: "2026-11-10",
-            status: "Not started" as CommercialStatus,
+            status: "Not started" as Status,
             lastUpdated: new Date().toISOString(),
             reminderCount: 0,
           };
@@ -874,849 +964,36 @@ export default function Page() {
     setActiveTab("Commercial Inputs");
   }
 
-  function renderOverview() {
-    return (
-      <section className="space-y-8">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
-            Rights Overview
-          </p>
-          <h2 className="mt-1 text-3xl font-bold">
-            Football rights market view
-          </h2>
-          <p className="mt-2 text-slate-500">
-            Review current SportBusiness deal data by property,
-            market and broadcaster.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={selectedProperty}
-            onChange={(event) => {
-              setSelectedProperty(event.target.value);
-              setMarketFilter("All markets");
-              setBroadcasterFilter("All broadcasters");
-            }}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-          >
-            {properties.map((property) => (
-              <option key={property}>{property}</option>
-            ))}
-          </select>
-
-          <select
-            value={marketFilter}
-            onChange={(event) =>
-              setMarketFilter(event.target.value)
-            }
-            className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
-          >
-            <option>All markets</option>
-            {markets.map((market) => (
-              <option key={market}>{market}</option>
-            ))}
-          </select>
-
-          <select
-            value={broadcasterFilter}
-            onChange={(event) =>
-              setBroadcasterFilter(event.target.value)
-            }
-            className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
-          >
-            <option>All broadcasters</option>
-            {broadcasters.map((broadcaster) => (
-              <option key={broadcaster}>{broadcaster}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl bg-[#111827] p-5 text-white">
-            <p className="text-sm text-white/60">Selected property</p>
-            <p className="mt-3 text-xl font-bold">
-              {selectedProperty}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Deal records</p>
-            <p className="mt-3 text-3xl font-bold">
-              {propertyDeals.length}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Markets covered</p>
-            <p className="mt-3 text-3xl font-bold">
-              {markets.length}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Displayed records
-            </p>
-            <p className="mt-3 text-3xl font-bold">
-              {selectedDeals.length}
-            </p>
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-          <div className="border-b border-slate-200 p-6">
-            <h3 className="text-lg font-bold">Deal records</h3>
-            <p className="text-sm text-slate-500">
-              SportBusiness records currently stored in the tracker.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th className="px-6 py-4">Property</th>
-                  <th className="px-6 py-4">Market</th>
-                  <th className="px-6 py-4">Broadcaster</th>
-                  <th className="px-6 py-4">Package</th>
-                  <th className="px-6 py-4">Cycle</th>
-                  <th className="px-6 py-4">Value</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100">
-                {selectedDeals.map((deal) => (
-                  <tr key={deal.id}>
-                    <td className="px-6 py-4 font-semibold">
-                      {deal.property}
-                    </td>
-                    <td className="px-6 py-4">{deal.market}</td>
-                    <td className="px-6 py-4">
-                      {deal.broadcaster}
-                    </td>
-                    <td className="px-6 py-4">{deal.package}</td>
-                    <td className="px-6 py-4">{deal.cycle}</td>
-                    <td className="px-6 py-4 font-semibold">
-                      {formatCurrency(
-                        deal.value,
-                        deal.currency
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  function renderContributorInputs() {
-    return (
-      <section className="mx-auto max-w-2xl space-y-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
-            Commercial Inputs
-          </p>
-          <h2 className="mt-1 text-3xl font-bold">
-            Add your market contribution
-          </h2>
-          <p className="mt-2 text-slate-500">
-            Complete the fields below. Internal ownership and
-            administration are managed separately.
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <div className="space-y-5">
-            <label className="block text-sm font-semibold">
-              Property
-              <select
-                value={commercialProperty}
-                onChange={(event) =>
-                  changeCommercialProperty(event.target.value)
-                }
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
-              >
-                {properties.map((property) => (
-                  <option key={property}>{property}</option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block text-sm font-semibold">
-              Market or territory
-              <input
-                value={draft.market}
-                onChange={(event) =>
-                  updateDraft("market", event.target.value)
-                }
-                placeholder="e.g. Germany"
-                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-              />
-            </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-semibold">
-                Rights cycle
-                <input
-                  value={draft.cycle}
-                  onChange={(event) =>
-                    updateDraft("cycle", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Currency
-                <select
-                  value={draft.currency}
-                  onChange={(event) =>
-                    updateDraft("currency", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
-                >
-                  <option>EUR</option>
-                  <option>GBP</option>
-                  <option>USD</option>
-                  <option>AUD</option>
-                  <option>JPY</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-semibold">
-                Annual average value
-                <input
-                  value={draft.aav}
-                  onChange={(event) =>
-                    updateDraft("aav", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Total cycle value
-                <input
-                  value={draft.cycleTotal}
-                  onChange={(event) =>
-                    updateDraft(
-                      "cycleTotal",
-                      event.target.value
-                    )
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-            </div>
-
-            <label className="block text-sm font-semibold">
-              Confidence
-              <select
-                value={draft.confidence}
-                onChange={(event) =>
-                  updateDraft(
-                    "confidence",
-                    event.target.value as Confidence
-                  )
-                }
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
-              >
-                <option>High</option>
-                <option>Medium</option>
-                <option>Low</option>
-              </select>
-            </label>
-
-            <label className="block text-sm font-semibold">
-              Package or rights details
-              <textarea
-                value={draft.packageDetails}
-                onChange={(event) =>
-                  updateDraft(
-                    "packageDetails",
-                    event.target.value
-                  )
-                }
-                rows={3}
-                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-              />
-            </label>
-
-            <label className="block text-sm font-semibold">
-              Commentary
-              <textarea
-                value={draft.commentary}
-                onChange={(event) =>
-                  updateDraft("commentary", event.target.value)
-                }
-                rows={3}
-                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-              />
-            </label>
-
-            <label className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold">
-              <input
-                type="checkbox"
-                checked={draft.matchesSportBusiness}
-                onChange={(event) =>
-                  updateDraft(
-                    "matchesSportBusiness",
-                    event.target.checked
-                  )
-                }
-                className="h-4 w-4"
-              />
-              SportBusiness data is accurate
-            </label>
-
-            <button
-              onClick={saveCommercialInput}
-              disabled={
-                !draft.market.trim() || !draft.cycle.trim()
-              }
-              className="w-full rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
-            >
-              Submit contribution
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  function renderAdminInputs() {
-    return (
-      <section className="space-y-8">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
-            Commercial Inputs — Admin
-          </p>
-          <h2 className="mt-1 text-3xl font-bold">
-            Manage commercial inputs
-          </h2>
-          <p className="mt-2 text-slate-500">
-            Assign owners, review contributions and manage
-            completion.
-          </p>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-bold">
-              Add or edit input
-            </h3>
-
-            <div className="mt-6 space-y-4">
-              <label className="block text-sm font-semibold">
-                Region
-                <select
-                  value={commercialRegion}
-                  onChange={(event) =>
-                    changeCommercialRegion(
-                      event.target.value as Region
-                    )
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
-                >
-                  <option>EMEA</option>
-                  <option>APAC</option>
-                  <option>AMERICAS</option>
-                </select>
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Property
-                <select
-                  value={commercialProperty}
-                  onChange={(event) =>
-                    changeCommercialProperty(event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
-                >
-                  {properties.map((property) => (
-                    <option key={property}>{property}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Market
-                <input
-                  value={draft.market}
-                  onChange={(event) =>
-                    updateDraft("market", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Cycle
-                <input
-                  value={draft.cycle}
-                  onChange={(event) =>
-                    updateDraft("cycle", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block text-sm font-semibold">
-                  AAV
-                  <input
-                    value={draft.aav}
-                    onChange={(event) =>
-                      updateDraft("aav", event.target.value)
-                    }
-                    className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                  />
-                </label>
-
-                <label className="block text-sm font-semibold">
-                  Cycle total
-                  <input
-                    value={draft.cycleTotal}
-                    onChange={(event) =>
-                      updateDraft(
-                        "cycleTotal",
-                        event.target.value
-                      )
-                    }
-                    className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                  />
-                </label>
-              </div>
-
-              <label className="block text-sm font-semibold">
-                Owner
-                <input
-                  value={draft.owner}
-                  onChange={(event) =>
-                    updateDraft("owner", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Owner email
-                <input
-                  type="email"
-                  value={draft.ownerEmail}
-                  onChange={(event) =>
-                    updateDraft(
-                      "ownerEmail",
-                      event.target.value
-                    )
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Contributors
-                <input
-                  value={draft.contributors.join(", ")}
-                  onChange={(event) =>
-                    updateDraft(
-                      "contributors",
-                      event.target.value
-                        .split(",")
-                        .map((value) => value.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                  placeholder="Separate names with commas"
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Due date
-                <input
-                  type="date"
-                  value={draft.due}
-                  onChange={(event) =>
-                    updateDraft("due", event.target.value)
-                  }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Package details
-                <textarea
-                  value={draft.packageDetails}
-                  onChange={(event) =>
-                    updateDraft(
-                      "packageDetails",
-                      event.target.value
-                    )
-                  }
-                  rows={3}
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="block text-sm font-semibold">
-                Commentary
-                <textarea
-                  value={draft.commentary}
-                  onChange={(event) =>
-                    updateDraft("commentary", event.target.value)
-                  }
-                  rows={3}
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
-                />
-              </label>
-
-              <label className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold">
-                <input
-                  type="checkbox"
-                  checked={draft.matchesSportBusiness}
-                  onChange={(event) =>
-                    updateDraft(
-                      "matchesSportBusiness",
-                      event.target.checked
-                    )
-                  }
-                />
-                SportBusiness data is accurate
-              </label>
-
-              <button
-                onClick={saveCommercialInput}
-                disabled={
-                  !draft.market.trim() || !draft.cycle.trim()
-                }
-                className="w-full rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                Save input
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold">
-                Saved commercial inputs
-              </h3>
-
-              <select
-                value={commercialRegion}
-                onChange={(event) =>
-                  changeCommercialRegion(
-                    event.target.value as Region
-                  )
-                }
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
-              >
-                <option>EMEA</option>
-                <option>APAC</option>
-                <option>AMERICAS</option>
-              </select>
-            </div>
-
-            {regionInputs.map((input) => (
-              <div
-                key={input.id}
-                className="rounded-2xl bg-white p-6 shadow-sm"
-              >
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-lg font-bold">
-                        {input.property}
-                      </h4>
-                      <StatusBadge status={input.status} />
-                    </div>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      {input.market} · {input.cycle}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => removeInput(input.id)}
-                    className="text-sm font-semibold text-red-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs uppercase text-slate-500">
-                      Owner
-                    </p>
-                    <p className="mt-1 font-bold">
-                      {input.owner}
-                    </p>
-                    {input.ownerEmail && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        {input.ownerEmail}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs uppercase text-slate-500">
-                      Due
-                    </p>
-                    <p className="mt-1 font-bold">
-                      {input.due || "Not assigned"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs uppercase text-slate-500">
-                      AAV
-                    </p>
-                    <p className="mt-1 font-bold">
-                      {input.aav
-                        ? formatCurrency(
-                            parseNumber(input.aav),
-                            input.currency
-                          )
-                        : "Not provided"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-50 p-4">
-                    <p className="text-xs uppercase text-slate-500">
-                      Cycle total
-                    </p>
-                    <p className="mt-1 font-bold">
-                      {input.cycleTotal
-                        ? formatCurrency(
-                            parseNumber(input.cycleTotal),
-                            input.currency
-                          )
-                        : "Not provided"}
-                    </p>
-                  </div>
-                </div>
-
-                {input.contributors.length > 0 && (
-                  <p className="mt-4 text-sm text-slate-600">
-                    <strong>Contributors:</strong>{" "}
-                    {input.contributors.join(", ")}
-                  </p>
-                )}
-
-                {input.commentary && (
-                  <p className="mt-3 text-sm text-slate-700">
-                    <strong>Commentary:</strong>{" "}
-                    {input.commentary}
-                  </p>
-                )}
-
-                <div className="mt-5 flex justify-between border-t border-slate-100 pt-4">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      input.matchesSportBusiness
-                        ? "bg-green-100 text-green-800"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {input.matchesSportBusiness
-                      ? "SportBusiness matched"
-                      : "Not matched"}
-                  </span>
-
-                  {input.status === "Complete" ? (
-                    <button
-                      onClick={() => reopenInput(input.id)}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold"
-                    >
-                      Reopen
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => markComplete(input.id)}
-                      className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      Mark complete
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  function renderImport() {
-    return (
-      <section className="space-y-8">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
-            SportBusiness Import — Admin
-          </p>
-          <h2 className="mt-1 text-3xl font-bold">
-            Import and approve rights data
-          </h2>
-          <p className="mt-2 text-slate-500">
-            This section is only available in Admin view.
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <label className="inline-flex cursor-pointer rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white">
-            Choose CSV, XLSX or XLS file
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={handleImport}
-              className="hidden"
-            />
-          </label>
-
-          {importFileName && (
-            <p className="mt-4 text-sm text-slate-600">
-              Selected file: <strong>{importFileName}</strong>
-            </p>
-          )}
-
-          {uploadError && (
-            <p className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
-              {uploadError}
-            </p>
-          )}
-        </div>
-
-        {importedRows.length > 0 && (
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 p-6">
-              <div>
-                <h3 className="text-lg font-bold">
-                  Import review
-                </h3>
-                <p className="text-sm text-slate-500">
-                  {importedRows.length} rows ready for approval.
-                </p>
-              </div>
-
-              <button
-                onClick={approveRows}
-                className="rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white"
-              >
-                Approve rows
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4">Property</th>
-                    <th className="px-6 py-4">Market</th>
-                    <th className="px-6 py-4">Broadcaster</th>
-                    <th className="px-6 py-4">Package</th>
-                    <th className="px-6 py-4">Cycle</th>
-                    <th className="px-6 py-4">Value</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-slate-100">
-                  {importedRows.map((row, index) => (
-                    <tr key={`${row.market}-${index}`}>
-                      <td className="px-6 py-4 font-semibold">
-                        {row.property}
-                      </td>
-                      <td className="px-6 py-4">{row.market}</td>
-                      <td className="px-6 py-4">
-                        {row.broadcaster}
-                      </td>
-                      <td className="px-6 py-4">{row.package}</td>
-                      <td className="px-6 py-4">{row.cycle}</td>
-                      <td className="px-6 py-4 font-semibold">
-                        {formatCurrency(
-                          row.value,
-                          row.currency
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </section>
-    );
-  }
-
-  const visibleTabs: Tab[] =
-    userMode === "admin"
-      ? [
-          "Rights Overview",
-          "SportBusiness Import",
-          "Commercial Inputs",
-        ]
-      : ["Rights Overview", "Commercial Inputs"];
-
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
       <header className="bg-[#111827] text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-4">
-            <img
-              src="/img-logo-white.png"
-              alt="IMG"
-              className="h-9 w-auto"
-            />
-            <div className="border-l border-white/30 pl-4">
-              <p className="text-xs uppercase tracking-[0.25em] text-white/60">
-                Football
-              </p>
-              <h1 className="text-xl font-semibold">
-                Rights Tracker
-              </h1>
-            </div>
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-5">
+          <img
+            src="/img-logo-white.png"
+            alt="IMG"
+            className="h-9 w-auto"
+          />
+
+          <div className="border-l border-white/30 pl-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-white/60">
+              Football
+            </p>
+            <h1 className="text-xl font-semibold">
+              Rights Tracker — Admin
+            </h1>
           </div>
-
-          <select
-            value={userMode}
-            onChange={(event) => {
-              const nextMode = event.target.value as UserMode;
-
-              setUserMode(nextMode);
-
-              if (
-                nextMode === "contributor" &&
-                activeTab === "SportBusiness Import"
-              ) {
-                setActiveTab("Rights Overview");
-              }
-            }}
-            className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white"
-          >
-            <option value="admin" className="text-slate-900">
-              Admin view
-            </option>
-            <option
-              value="contributor"
-              className="text-slate-900"
-            >
-              Contributor view
-            </option>
-          </select>
         </div>
       </header>
 
       <nav className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl gap-2 px-6">
-          {visibleTabs.map((tab) => (
+          {(
+            [
+              "Rights Overview",
+              "SportBusiness Import",
+              "Commercial Inputs",
+            ] as Tab[]
+          ).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -1733,16 +1010,631 @@ export default function Page() {
       </nav>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        {activeTab === "Rights Overview" && renderOverview()}
+        {activeTab === "Rights Overview" && (
+          <section className="space-y-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
+                Rights Overview
+              </p>
+              <h2 className="mt-1 text-3xl font-bold">
+                Football rights market view
+              </h2>
+              <p className="mt-2 text-slate-500">
+                Review current SportBusiness deal data by property,
+                market and broadcaster.
+              </p>
+            </div>
 
-        {activeTab === "SportBusiness Import" &&
-          userMode === "admin" &&
-          renderImport()}
+            <div className="flex flex-wrap gap-3">
+              <select
+                value={selectedProperty}
+                onChange={(event) => {
+                  setSelectedProperty(event.target.value);
+                  setMarketFilter("All markets");
+                  setBroadcasterFilter("All broadcasters");
+                }}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+              >
+                {properties.map((property) => (
+                  <option key={property}>{property}</option>
+                ))}
+              </select>
 
-        {activeTab === "Commercial Inputs" &&
-          (userMode === "admin"
-            ? renderAdminInputs()
-            : renderContributorInputs())}
+              <select
+                value={marketFilter}
+                onChange={(event) =>
+                  setMarketFilter(event.target.value)
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option>All markets</option>
+                {markets.map((market) => (
+                  <option key={market}>{market}</option>
+                ))}
+              </select>
+
+              <select
+                value={broadcasterFilter}
+                onChange={(event) =>
+                  setBroadcasterFilter(event.target.value)
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm"
+              >
+                <option>All broadcasters</option>
+                {broadcasters.map((broadcaster) => (
+                  <option key={broadcaster}>{broadcaster}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="rounded-2xl bg-[#111827] p-5 text-white">
+                <p className="text-sm text-white/60">
+                  Selected property
+                </p>
+                <p className="mt-3 text-xl font-bold">
+                  {selectedProperty}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">
+                  Deal records
+                </p>
+                <p className="mt-3 text-3xl font-bold">
+                  {propertyDeals.length}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">
+                  Markets covered
+                </p>
+                <p className="mt-3 text-3xl font-bold">
+                  {markets.length}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <p className="text-sm text-slate-500">
+                  Displayed records
+                </p>
+                <p className="mt-3 text-3xl font-bold">
+                  {selectedDeals.length}
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+              <div className="border-b border-slate-200 p-6">
+                <h3 className="text-lg font-bold">
+                  SportBusiness deal records
+                </h3>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="px-6 py-4">Property</th>
+                      <th className="px-6 py-4">Market</th>
+                      <th className="px-6 py-4">Broadcaster</th>
+                      <th className="px-6 py-4">Package</th>
+                      <th className="px-6 py-4">Cycle</th>
+                      <th className="px-6 py-4">Value</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100">
+                    {selectedDeals.map((deal) => (
+                      <tr key={deal.id}>
+                        <td className="px-6 py-4 font-semibold">
+                          {deal.property}
+                        </td>
+                        <td className="px-6 py-4">
+                          {deal.market}
+                        </td>
+                        <td className="px-6 py-4">
+                          {deal.broadcaster}
+                        </td>
+                        <td className="px-6 py-4">
+                          {deal.package}
+                        </td>
+                        <td className="px-6 py-4">
+                          {deal.cycle}
+                        </td>
+                        <td className="px-6 py-4 font-semibold">
+                          {formatCurrency(
+                            deal.value,
+                            deal.currency
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeTab === "SportBusiness Import" && (
+          <section className="space-y-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
+                SportBusiness Import — Admin
+              </p>
+              <h2 className="mt-1 text-3xl font-bold">
+                Import and approve rights data
+              </h2>
+            </div>
+
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              <label className="inline-flex cursor-pointer rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white">
+                Choose CSV, XLSX or XLS file
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+              </label>
+
+              {importFileName && (
+                <p className="mt-4 text-sm text-slate-600">
+                  Selected file:{" "}
+                  <strong>{importFileName}</strong>
+                </p>
+              )}
+
+              {uploadError && (
+                <p className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                  {uploadError}
+                </p>
+              )}
+            </div>
+
+            {importedRows.length > 0 && (
+              <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-200 p-6">
+                  <div>
+                    <h3 className="text-lg font-bold">
+                      Import review
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                      {importedRows.length} rows ready for approval.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={approveRows}
+                    className="rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white"
+                  >
+                    Approve rows
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[800px] text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                      <tr>
+                        <th className="px-6 py-4">Property</th>
+                        <th className="px-6 py-4">Market</th>
+                        <th className="px-6 py-4">Broadcaster</th>
+                        <th className="px-6 py-4">Package</th>
+                        <th className="px-6 py-4">Cycle</th>
+                        <th className="px-6 py-4">Value</th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-slate-100">
+                      {importedRows.map((row, index) => (
+                        <tr key={`${row.market}-${index}`}>
+                          <td className="px-6 py-4 font-semibold">
+                            {row.property}
+                          </td>
+                          <td className="px-6 py-4">
+                            {row.market}
+                          </td>
+                          <td className="px-6 py-4">
+                            {row.broadcaster}
+                          </td>
+                          <td className="px-6 py-4">
+                            {row.package}
+                          </td>
+                          <td className="px-6 py-4">
+                            {row.cycle}
+                          </td>
+                          <td className="px-6 py-4 font-semibold">
+                            {formatCurrency(
+                              row.value,
+                              row.currency
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === "Commercial Inputs" && (
+          <section className="space-y-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-[#e31837]">
+                Commercial Inputs — Admin
+              </p>
+              <h2 className="mt-1 text-3xl font-bold">
+                Manage commercial inputs
+              </h2>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+              <div className="rounded-2xl bg-white p-6 shadow-sm">
+                <h3 className="text-lg font-bold">
+                  Add or edit input
+                </h3>
+
+                <div className="mt-6 space-y-4">
+                  <label className="block text-sm font-semibold">
+                    Region
+                    <select
+                      value={commercialRegion}
+                      onChange={(event) =>
+                        changeRegion(
+                          event.target.value as Region
+                        )
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
+                    >
+                      <option>EMEA</option>
+                      <option>APAC</option>
+                      <option>AMERICAS</option>
+                    </select>
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Property
+                    <select
+                      value={commercialProperty}
+                      onChange={(event) =>
+                        changeProperty(event.target.value)
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
+                    >
+                      {properties.map((property) => (
+                        <option key={property}>{property}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Market
+                    <input
+                      value={draft.market}
+                      onChange={(event) =>
+                        updateDraft("market", event.target.value)
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block text-sm font-semibold">
+                      Cycle
+                      <input
+                        value={draft.cycle}
+                        onChange={(event) =>
+                          updateDraft("cycle", event.target.value)
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      />
+                    </label>
+
+                    <label className="block text-sm font-semibold">
+                      Currency
+                      <select
+                        value={draft.currency}
+                        onChange={(event) =>
+                          updateDraft(
+                            "currency",
+                            event.target.value
+                          )
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 font-normal"
+                      >
+                        <option>EUR</option>
+                        <option>GBP</option>
+                        <option>USD</option>
+                        <option>CHF</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block text-sm font-semibold">
+                      AAV
+                      <input
+                        value={draft.aav}
+                        onChange={(event) =>
+                          updateDraft("aav", event.target.value)
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      />
+                    </label>
+
+                    <label className="block text-sm font-semibold">
+                      Cycle total
+                      <input
+                        value={draft.cycleTotal}
+                        onChange={(event) =>
+                          updateDraft(
+                            "cycleTotal",
+                            event.target.value
+                          )
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="block text-sm font-semibold">
+                    Owner
+                    <input
+                      value={draft.owner}
+                      onChange={(event) =>
+                        updateDraft("owner", event.target.value)
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Owner email
+                    <input
+                      type="email"
+                      value={draft.ownerEmail}
+                      onChange={(event) =>
+                        updateDraft(
+                          "ownerEmail",
+                          event.target.value
+                        )
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Contributors
+                    <input
+                      value={draft.contributors.join(", ")}
+                      onChange={(event) =>
+                        updateDraft(
+                          "contributors",
+                          event.target.value
+                            .split(",")
+                            .map((value) => value.trim())
+                            .filter(Boolean)
+                        )
+                      }
+                      placeholder="Separate names with commas"
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Due date
+                    <input
+                      type="date"
+                      value={draft.due}
+                      onChange={(event) =>
+                        updateDraft("due", event.target.value)
+                      }
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Package details
+                    <textarea
+                      value={draft.packageDetails}
+                      onChange={(event) =>
+                        updateDraft(
+                          "packageDetails",
+                          event.target.value
+                        )
+                      }
+                      rows={3}
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-semibold">
+                    Commentary
+                    <textarea
+                      value={draft.commentary}
+                      onChange={(event) =>
+                        updateDraft(
+                          "commentary",
+                          event.target.value
+                        )
+                      }
+                      rows={3}
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="flex items-center gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={draft.matchesSportBusiness}
+                      onChange={(event) =>
+                        updateDraft(
+                          "matchesSportBusiness",
+                          event.target.checked
+                        )
+                      }
+                    />
+                    SportBusiness data is accurate
+                  </label>
+
+                  <button
+                    onClick={saveCommercialInput}
+                    disabled={
+                      !draft.market.trim() ||
+                      !draft.cycle.trim()
+                    }
+                    className="w-full rounded-lg bg-[#e31837] px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    Save input
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">
+                    Saved commercial inputs
+                  </h3>
+
+                  <select
+                    value={commercialRegion}
+                    onChange={(event) =>
+                      changeRegion(
+                        event.target.value as Region
+                      )
+                    }
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+                  >
+                    <option>EMEA</option>
+                    <option>APAC</option>
+                    <option>AMERICAS</option>
+                  </select>
+                </div>
+
+                {regionInputs.map((input) => (
+                  <div
+                    key={input.id}
+                    className="rounded-2xl bg-white p-6 shadow-sm"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-lg font-bold">
+                            {input.property}
+                          </h4>
+                          <StatusBadge status={input.status} />
+                        </div>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          {input.market} · {input.cycle}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => removeInput(input.id)}
+                        className="text-sm font-semibold text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-xs uppercase text-slate-500">
+                          Owner
+                        </p>
+                        <p className="mt-1 font-bold">
+                          {input.owner}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {input.ownerEmail}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-xs uppercase text-slate-500">
+                          Due
+                        </p>
+                        <p className="mt-1 font-bold">
+                          {input.due || "Not assigned"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-xs uppercase text-slate-500">
+                          AAV
+                        </p>
+                        <p className="mt-1 font-bold">
+                          {input.aav
+                            ? formatCurrency(
+                                parseNumber(input.aav),
+                                input.currency
+                              )
+                            : "Not provided"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-4">
+                        <p className="text-xs uppercase text-slate-500">
+                          Cycle total
+                        </p>
+                        <p className="mt-1 font-bold">
+                          {input.cycleTotal
+                            ? formatCurrency(
+                                parseNumber(input.cycleTotal),
+                                input.currency
+                              )
+                            : "Not provided"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {input.commentary && (
+                      <p className="mt-4 text-sm text-slate-700">
+                        <strong>Commentary:</strong>{" "}
+                        {input.commentary}
+                      </p>
+                    )}
+
+                    <div className="mt-5 flex justify-between border-t border-slate-100 pt-4">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          input.matchesSportBusiness
+                            ? "bg-green-100 text-green-800"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {input.matchesSportBusiness
+                          ? "SportBusiness matched"
+                          : "Not matched"}
+                      </span>
+
+                      {input.status === "Complete" ? (
+                        <button
+                          onClick={() => reopenInput(input.id)}
+                          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold"
+                        >
+                          Reopen
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => markComplete(input.id)}
+                          className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          Mark complete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
